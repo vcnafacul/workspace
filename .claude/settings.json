@@ -1,0 +1,65 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./ws status*)",
+      "Bash(git -C api-vcnafacul status*)",
+      "Bash(git -C api-vcnafacul log*)",
+      "Bash(git -C api-vcnafacul diff*)",
+      "Bash(git -C api-vcnafacul show*)",
+      "Bash(git -C api-vcnafacul branch*)",
+      "Bash(git -C api-vcnafacul fetch*)",
+      "Bash(git -C client-vcnafacul status*)",
+      "Bash(git -C client-vcnafacul log*)",
+      "Bash(git -C client-vcnafacul diff*)",
+      "Bash(git -C client-vcnafacul show*)",
+      "Bash(git -C client-vcnafacul branch*)",
+      "Bash(git -C client-vcnafacul fetch*)",
+      "Bash(git -C ms-simulado status*)",
+      "Bash(git -C ms-simulado log*)",
+      "Bash(git -C ms-simulado diff*)",
+      "Bash(git -C ms-simulado show*)",
+      "Bash(git -C ms-simulado branch*)",
+      "Bash(git -C ms-simulado fetch*)",
+      "Bash(git -C ms-omr status*)",
+      "Bash(git -C ms-omr log*)",
+      "Bash(git -C ms-omr diff*)",
+      "Bash(git -C ms-omr show*)",
+      "Bash(git -C ms-omr branch*)",
+      "Bash(git -C ms-omr fetch*)",
+      "Bash(git -C vcnafacul-form status*)",
+      "Bash(git -C vcnafacul-form log*)",
+      "Bash(git -C vcnafacul-form diff*)",
+      "Bash(git -C vcnafacul-form show*)",
+      "Bash(git -C vcnafacul-form branch*)",
+      "Bash(git -C vcnafacul-form fetch*)",
+      "Bash(git -C vcnafacul-stack status*)",
+      "Bash(git -C vcnafacul-stack log*)",
+      "Bash(git -C vcnafacul-stack diff*)",
+      "Bash(git -C vcnafacul-stack show*)",
+      "Bash(git -C vcnafacul-stack branch*)",
+      "Bash(git -C vcnafacul-stack fetch*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push * --force*)",
+      "Bash(git -C * push --force*)",
+      "Bash(git push * main)",
+      "Bash(git push * develop)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/ws status --curto"
+          }
+        ]
+      }
+    ]
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true
+  }
+}

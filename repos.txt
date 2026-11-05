@@ -1,0 +1,10 @@
+# Repos do workspace — lido pelo ./ws e fonte da tabela de repos do AGENTS.md.
+# Formato: nome [branch] [opcional]   (sem branch = branch padrão do GitHub)
+api-vcnafacul
+client-vcnafacul
+ms-simulado
+ms-omr
+vcnafacul-form
+vcnafacul-stack
+docs                opcional
+e2e-vcnafacul       opcional

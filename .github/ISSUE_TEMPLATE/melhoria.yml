@@ -1,0 +1,67 @@
+name: 🔧 Melhoria de funcionalidade
+description: Sugira melhorias para funcionalidades já existentes no Você na Facul.
+labels: ['Melhoria', 'Triagem']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Obrigado por contribuir para a melhoria do nosso projeto
+        **Observação:** se isso é uma pergunta ou se você não tem certeza de algum ponto, considere usar [nosso board de discussão](https://github.com/orgs/vcnafacul/discussions).
+
+        **Este repo é público.** Não inclua dados pessoais, dados reais de estudantes nem credenciais.
+  - type: checkboxes
+    attributes:
+      label: Já existe alguma outra issue sobre essa melhoria?
+      description: Por favor, verifique se já existe outra issue relatando a mesma melhoria.
+      options:
+        - label: Eu verifiquei se já existia alguma issue sobre a melhoria.
+          required: true
+  - type: textarea
+    id: context-for-improvement
+    attributes:
+      label: Contexto
+      description: Uma descrição clara e concisa sobre a funcionalidade atual e por que ela precisa de melhoria.
+      placeholder: A funcionalidade X poderia ser melhorada porque...
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-improvement
+    attributes:
+      label: Proposta de melhoria
+      description: |
+        Explique como a melhoria pode ser implementada e quais benefícios ela trará para a funcionalidade.
+
+        **Não tem problema se você não tiver todos os detalhes agora!**
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives-considered
+    attributes:
+      label: Alternativas consideradas
+      description: Descreva quaisquer alternativas que você tenha considerado para a melhoria da funcionalidade.
+    validations:
+      required: false
+  - type: textarea
+    id: repos
+    attributes:
+      label: Repos envolvidos (se souber)
+      placeholder: api-vcnafacul, client-vcnafacul
+    validations:
+      required: false
+  - type: textarea
+    id: resources
+    attributes:
+      label: Recursos adicionais
+      description: |
+        Adicione qualquer outro contexto, links ou capturas de tela sobre a melhoria proposta aqui.
+        Dica: você pode anexar imagens ou arquivos de log arrastando os arquivos para esta área.
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Código de Conduta
+      description: Ao enviar esta issue, você concorda em seguir nosso [Código de Conduta](https://github.com/vcnafacul/.github/blob/19e931bf4756c6a562d0ef82a9561b0ff1006d6f/CODE_OF_CONDUCT.md).
+      options:
+        - label: Li o Código de Conduta e entendo minhas responsabilidades como membro da comunidade Você na Facul
+          required: true

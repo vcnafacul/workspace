@@ -1,0 +1,22 @@
+# Allowlist: ignore everything at the root, then let through only the workspace's own files.
+# Each new top-level workspace folder needs a "!" line here.
+/*
+!/.gitignore
+!/README.md
+!/AGENTS.md
+!/CLAUDE.md
+!/CONTEXT.md
+!/ws
+!/repos.txt
+!/.claude/
+!/.github/
+!/docs/
+!/tickets/
+
+# Even inside the allowed folders
+.env*
+CLAUDE.local.md
+.claude/settings.local.json
+.claude/worktrees/
+.superpowers/
+.DS_Store

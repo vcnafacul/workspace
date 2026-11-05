@@ -1,0 +1,67 @@
+name: 🌱 Novo pedido
+description: Faça uma sugestão de nova funcionalidade para o Você na Facul.
+labels: ['Feature', 'Triagem']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        # Muito obrigado por tirar um tempo para contribuir com o nosso projeto
+        **Observação:** se isso é uma pergunta ou se você não tem certeza de algum ponto, considere usar [nosso board de discussão](https://github.com/orgs/vcnafacul/discussions).
+
+        **Este repo é público.** Não inclua dados pessoais, dados reais de estudantes nem credenciais.
+  - type: checkboxes
+    attributes:
+      label: Já existe alguma outra issue sobre esse assunto?
+      description: Por favor, procure se já não existe outra issue sobre o assunto.
+      options:
+        - label: Eu verifiquei se já existia alguma issue sobre o assunto.
+          required: true
+  - type: textarea
+    id: context-for-change
+    attributes:
+      label: Contexto
+      description: Uma descrição clara e concisa sobre a situação-problema.
+      placeholder: Eu estou sempre frustrado quando...
+    validations:
+      required: true
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposta de solução
+      description: |
+        Explique como são a solução e os critérios da solução.
+
+        **Não tem problema se você não tiver isso agora!**
+    validations:
+      required: false
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: Uma descrição clara e concisa de quaisquer soluções ou recursos alternativos que você tenha considerado.
+    validations:
+      required: false
+  - type: textarea
+    id: repos
+    attributes:
+      label: Repos envolvidos (se souber)
+      placeholder: api-vcnafacul, client-vcnafacul
+    validations:
+      required: false
+  - type: textarea
+    id: resources
+    attributes:
+      label: Recursos adicionais
+      description: |
+        Adicione qualquer outro contexto, links ou capturas de tela sobre o pedido aqui.
+        Dica: você pode anexar imagens ou arquivos de log arrastando os arquivos para esta área.
+    validations:
+      required: false
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Código de Conduta
+      description: Ao enviar esta issue, você concorda em seguir nosso [Código de Conduta](https://github.com/vcnafacul/.github/blob/19e931bf4756c6a562d0ef82a9561b0ff1006d6f/CODE_OF_CONDUCT.md).
+      options:
+        - label: Li o Código de Conduta e entendo minhas responsabilidades como membro da comunidade Você na Facul
+          required: true
