@@ -12,6 +12,9 @@ dentro ou de fora do projeto, lê e entende o problema sem abrir nada além dele
 e **não pede para a QA escolher solução**. Quem pegar o card para desenvolver abre uma sessão, investiga e só
 então cria o ticket do contrato, com spec e plano. A solução é decisão de quem desenvolve.
 
+Vale para **todo relato novo**, mesmo no meio de outra conversa. Para relatos da QA, esta skill substitui
+superpowers:brainstorming e writing-plans: elas servem a quem desenvolve, depois que o card for pego.
+
 **Violar a letra destes passos é violar o espírito.** Os erros que esta skill evita: card que depende de
 link, card com jargão, e solução técnica decidida por quem não programa.
 
@@ -45,6 +48,11 @@ Para perguntar, use `AskUserQuestion` (sem ela, escreva a pergunta e encerre o t
 1. **Entenda o relato.** Pergunte só o que faltar, em linguagem de uso: em que tela (e por qual menu se
    chega), com qual perfil, o passo a passo, o que esperava, o que aconteceu, se acontece sempre, desde
    quando, em homologação ou produção. Não invente o que ela não disse.
+   - **Vários assuntos no mesmo relato:** um card por problema, e diga isso à QA. Partes do mesmo problema
+     (várias telas, várias causas) ficam num card só.
+   - **Já existe card?** Antes de investigar, procure no board (`gh project item-list 2 --owner vcnafacul
+     --limit 2000 --format json`, título e corpo; o board tem mais de 300 itens) um card sobre o mesmo problema. Achou? Mostre o título à QA
+     e pergunte se é o mesmo; se for, não crie outro: diga que ela pode comentar nele pelo site.
 
 2. **Investigue, sem mostrar a investigação.** Leia `CONTEXT.md` e `docs/arquitetura.md` e siga o caminho do
    dado nos repos (`./ws clonar` se faltar algum). O código serve só para **você** descrever com precisão:
@@ -77,6 +85,11 @@ Para perguntar, use `AskUserQuestion` (sem ela, escreva a pergunta e encerre o t
    Area (a parte com mais trabalho) e Status (To Do) você define e só informa. Peça o OK para publicar ou os
    ajustes. Sem OK explícito, nada vai para o GitHub.
 
+   **Até a QA ficar satisfeita.** Ajuste ou informação nova (outro lugar, um detalhe, um print)? Volte ao
+   passo que ela afeta: ao 2, se muda o problema; senão, só reescreva. Mostre o texto inteiro de novo e peça
+   um OK novo, porque o anterior valia para o outro texto. Repita quantas vezes for preciso. Dúvida da QA
+   sobre a explicação? Responda em linguagem de uso antes de seguir.
+
 5. **Publique.** Siga **todas** as regras de `references/board.md`: leituras primeiro, depois **2 escritas**
    pelo script, **um card só**, mesmo que o problema apareça em várias partes do sistema.
 
@@ -103,6 +116,11 @@ CEP ao cadastrar um cursinho".
 
 **Esperado:** <o que deveria acontecer>
 **Acontece:** <o que acontece>
+
+<!-- Pedido de melhoria (algo novo, não quebrado): troque "Como reproduzir" por "Como é hoje"
+(o caminho atual, passo a passo) e "Esperado/Acontece" por "O que se quer" (o resultado para quem usa,
+sem desenhar tela). -->
+
 
 ## Impacto
 <Quem é afetado, o que fica salvo errado, quem vê o erro depois, com que frequência.>
@@ -132,6 +150,8 @@ _Sugestões para quem for desenvolver. A decisão é de quem pegar o card._
 | "Crio logo o `tickets/NNN` para adiantar" | Quem cria é o dev, quando pegar o card |
 | "São duas partes do sistema, faço dois cards" | Um problema, um card. O dev decide como dividir |
 | "'Sobe pro board' já é o OK" | O OK é para o texto mostrado no passo 4 |
+| "Ela já tinha dado OK, a mudança é pequena" | Texto mudou, OK novo |
+| "É criativo, então começo pelo brainstorming" | Para relato da QA, esta skill. Brainstorming é do dev, depois |
 
 ## Red flags
 - No card ou na conversa: link, caminho, `arquivo:linha`, nome de função, componente, repo, "api", "client"

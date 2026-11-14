@@ -6,7 +6,7 @@ que instruções do usuário em CLAUDE.md/AGENTS.md vencem).
 
 | Skill | Sob o contrato |
 |---|---|
-| `brainstorming` | Roda com o ticket em `planejando`. A spec vai para **`tickets/NNN-slug/spec.md`** — nunca `docs/superpowers/specs/` — com decisões `D1…Dn` no modelo `docs/modelos/spec.md`. Transcrição ou material do visual companion que valha guardar vai em `planejamento/`. |
+| `brainstorming` | **Não** roda para relato de problema da QA: esse vira card no board pela skill `criar-ticket`, e o brainstorming fica para quem pegar o card. Roda com o ticket em `planejando`. A spec vai para **`tickets/NNN-slug/spec.md`** — nunca `docs/superpowers/specs/` — com decisões `D1…Dn` no modelo `docs/modelos/spec.md`. Transcrição ou material do visual companion que valha guardar vai em `planejamento/`. |
 | `writing-plans` | Escreve **`tickets/NNN-slug/plano.md`** — nunca `docs/superpowers/plans/`. Um plano por ticket; **toda Task nomeia o seu card**. Logo depois, crie os cards e passe o ticket a `pronto`. |
 | `using-git-worktrees` | Preferência declarada: worktree só para sessões simultâneas, em `.worktrees/<repo>/NNN-NN` via `git -C <repo> worktree add`. Não use o `EnterWorktree` nativo na raiz. |
 | `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` | Sim. Cada card é executado no seu repo. |

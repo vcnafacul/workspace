@@ -19,7 +19,7 @@ de escrita fora dele. Um card por problema; vários problemas: um script por vez
 ## Antes de escrever (leituras)
 
 ```bash
-gh project item-list 2 --owner vcnafacul --limit 200 --format json   # filtre pelo título: duplicata → pare e mostre
+gh project item-list 2 --owner vcnafacul --limit 2000 --format json   # filtre pelo título: duplicata → pare e mostre
 gh api rate_limit                                                    # core ou graphql abaixo de 500 → pare
 ```
 
