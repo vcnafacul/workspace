@@ -38,7 +38,8 @@ O essencial:
 - Mudança que decide algo, toca mais de um repo ou precisa de mais de um PR → **ticket** em
   `tickets/NNN-slug/` (próximo número = maior existente + 1). Senão, basta o PR.
 - Ticket → `README.md`, `spec.md` (decisões `D1…Dn`), `plano.md` e cards `NN-AREA-slug.md` (um PR por repo).
-  **Crie tickets pela skill `criar-ticket`** (causa raiz, soluções para escolher e, com OK, o draft no board).
+  Problema visto na plataforma (em geral pela QA) vira **card no board pela skill `criar-ticket`**; o ticket
+  em `tickets/` é criado por quem pegar o card para desenvolver.
 - Branch `<tipo>/NNN-NN-slug`, igual em todos os repos do card. PR para `develop`; empilhe só quando
   precisar, e o merge é de baixo para cima. Título termina em `(NNN/NN)`. **Abra PRs pela skill `abrir-pr`.**
 - Cite em código como `tickets/NNN`, `tickets/NNN/NN` ou `tickets/NNN D3`.

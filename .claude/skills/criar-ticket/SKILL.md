@@ -1,106 +1,160 @@
 ---
 name: criar-ticket
-description: Use quando alguém pedir para criar ou abrir um ticket a partir de um bug, pedido ou contexto ("cria um ticket pra isso", "abre um ticket", "registra isso como ticket", "/criar-ticket"), inclusive quando também pedir para subir o ticket para o board do GitHub (Project #2 do vcnafacul).
+description: Use quando alguém, em geral a QA (que não programa), quiser registrar no board do GitHub (Project #2 do vcnafacul) um problema ou pedido visto na plataforma — "cria um ticket pra isso", "abre um card", "achei um bug", "registra isso no board", "/criar-ticket".
 ---
 
-# Criar ticket
+# Criar ticket (card de problema no board)
 
-Do contexto ao ticket em `tickets/NNN-slug/` e, **só com o OK de quem pediu**, a um draft no board. Quem pediu
-escolhe a solução e o recorte. O agente investiga e propõe; não decide por essa pessoa.
+Transforma o que a QA viu na plataforma em **um card no board que se explica sozinho**: qualquer pessoa, de
+dentro ou de fora do projeto, lê e entende o problema sem abrir nada além dele.
 
-**Violar a letra destes passos é violar o espírito.** Os erros que esta skill evita: escrever D1 sozinho, juntar
-repos num ticket sem perguntar e criar os arquivos antes das escolhas.
+**O que esta skill não faz:** não cria pasta em `tickets/`, spec, plano nem cards do contrato, não faz commit
+e **não pede para a QA escolher solução**. Quem pegar o card para desenvolver abre uma sessão, investiga e só
+então cria o ticket do contrato, com spec e plano. A solução é decisão de quem desenvolve.
+
+Vale para **todo relato novo**, mesmo no meio de outra conversa. Para relatos da QA, esta skill substitui
+superpowers:brainstorming e writing-plans: elas servem a quem desenvolve, depois que o card for pego.
+
+**Violar a letra destes passos é violar o espírito.** Os erros que esta skill evita: card que depende de
+link, card com jargão, e solução técnica decidida por quem não programa.
+
+## Regras do card
+
+- **Autossuficiente.** Nada de link, caminho, "ver X", número de ticket, PR ou commit. Tudo o que importa está
+  no texto.
+- **Linguagem de quem usa a plataforma**, no card e na conversa: telas, menus, perfis, ações e regras. Use os
+  termos de `CONTEXT.md` (Processo seletivo, Inscrição, Matrícula…) e, para o resto, os nomes como aparecem
+  na tela (títulos, botões, menus), entre aspas.
+- **Nunca**, nem entre parênteses: arquivo, pasta, linha, função, componente, variável, endpoint, banco,
+  tabela, campo, id, serviço externo pelo nome, nome de repo, "api", "client", "front/back".
+- **Detalhado.** Passos para reproduzir com dados fictícios, o esperado, o que acontece, o impacto e os outros
+  lugares onde acontece.
+- **Sugestões, não decisões.** De 1 a 3 caminhos simples, pelo efeito para quem usa, rotulados como sugestão.
+  Nada de "como implementar".
+- **Conteúdo público** (contrato §7): nenhum dado pessoal, dado real de estudante, host de produção ou
+  credencial. Prints só de homologação ou fictícios.
+
+| Técnico (não escreva) | Como escrever |
+|---|---|
+| "a mudança do CEP chama a BrasilAPI e move o pin" | "quando o CEP muda, o sistema leva o pin para o ponto central daquele CEP" |
+| "o efeito roda de novo ao remontar a etapa" | "ao voltar uma etapa e avançar de novo, o sistema refaz essa conta" |
+| "agrupa pelo texto, não pelo `questionId`" | "a planilha junta as respostas pelo enunciado; se o enunciado muda, a mesma pergunta vira duas colunas" |
+| "acontece em três componentes do client" | "acontece também no painel, ao criar e ao editar um cursinho" |
 
 ## Passos
 
-Na ordem. Os passos 3 e 4 são **paradas**: espere a resposta antes de seguir.
+Para perguntar, use `AskUserQuestion` (sem ela, escreva a pergunta e encerre o turno).
 
-1. **Prepare o workspace.** Leia `docs/contrato-de-desenvolvimento.md` e os modelos em `docs/modelos/`. Repo
-   que falta → `./ws clonar`. O commit do passo 7 vai no `main` atualizado: se o workspace estiver em outra
-   branch ou com mudanças, **não troque nem descarte nada agora**; isso se resolve no passo 7, com a pessoa.
+1. **Entenda o relato.** Pergunte só o que faltar, em linguagem de uso: em que tela (e por qual menu se
+   chega), com qual perfil, o passo a passo, o que esperava, o que aconteceu, se acontece sempre, desde
+   quando, em homologação ou produção. Não invente o que ela não disse.
+   - **Vários assuntos no mesmo relato:** um card por problema, e diga isso à QA. Partes do mesmo problema
+     (várias telas, várias causas) ficam num card só.
+   - **Já existe card?** Antes de investigar, procure no board (`gh project item-list 2 --owner vcnafacul
+     --limit 2000 --format json`, título e corpo; o board tem mais de 300 itens) um card sobre o mesmo problema. Achou? Mostre o título à QA
+     e pergunte se é o mesmo; se for, não crie outro: diga que ela pode comentar nele pelo site.
 
-2. **Ache a causa raiz.** Siga o dado de ponta a ponta nos repos (`docs/arquitetura.md` mostra o caminho):
-   client → api → microsserviço → banco. Para cada elo, `arquivo:linha`. Procure **o mesmo defeito em outros
-   lugares** (outra tela, outro export, outro serviço). Para bug, siga a fase 1 (investigação) de
-   superpowers:systematic-debugging. Reproduzir é desejável, não obrigatório: se a causa vier só da leitura do
-   código, diga isso no passo 3. Falta informação para seguir? Pergunte, em vez de supor.
+2. **Investigue, sem mostrar a investigação.** Leia `CONTEXT.md` e `docs/arquitetura.md` e siga o caminho do
+   dado nos repos (`./ws clonar` se faltar algum). O código serve só para **você** descrever com precisão:
+   - em que condições acontece, inclusive as que a QA não percebeu;
+   - outras telas e perfis com o mesmo problema. Em cada uma, confira **todas** as condições de novo,
+     inclusive só abrir a tela, voltar, editar e salvar sem mexer, que costumam ser as mais graves;
+   - a consequência: algo fica salvo errado? um dado que estava certo pode ser estragado? quem vê o erro
+     depois?
+   - se parte do relato é a regra atual funcionando, e não um defeito.
 
-3. **Mostre a causa e proponha soluções. Pare.** Use `AskUserQuestion` (sem ela, escreva a pergunta e
-   encerre o turno):
-   - A causa raiz em 2–4 linhas, com `arquivo:linha`, todos os lugares afetados e se foi reproduzida.
-   - **De 2 a 4 soluções**, cada uma com prós, contras, repos tocados e tamanho (P/M/G). Recomende uma, como
-     primeira opção, com "(Recomendado)".
-   - Uma única solução óbvia ainda é apresentada, com a alternativa mais próxima, para a pessoa confirmar.
+   Reproduzir é desejável, não obrigatório. Para bug, siga a fase 1 (investigação) de
+   superpowers:systematic-debugging, sem propor correção técnica.
 
-4. **A solução toca mais de um repo? Pergunte o recorte. Pare.** "Um ticket com um card por repo" ou "um
-   ticket por repo". Quem decide é a pessoa. Se só algumas soluções tocam mais de um repo, faça a pergunta
-   junto da do passo 3, condicionada a elas. Com um repo só, pule.
+3. **Confirme o que mudou no entendimento.** Se a investigação trouxe algo que a QA não disse (outro lugar
+   afetado, condição diferente, "isso é a regra hoje"), conte em linguagem de uso e confirme antes de
+   escrever. Se a análise **contradiz** o relato, diga isso com cuidado, peça para a QA repetir o teste com
+   os passos que você encontrou e registre a divergência em "Observações". Se nada mudou, siga.
 
-5. **Escreva o ticket** com o que foi escolhido, a partir de `docs/modelos/`:
-   - Número = maior `tickets/NNN` + 1 (o primeiro é `058`). Um ticket por repo → números seguidos, e o
-     `README.md` de cada um cita os outros em `## Ordem de deploy`.
-   - `README.md`: `status: pronto`, `responsavel:` = login no GitHub de quem pediu (o seu, por
-     `gh api user -q .login`, se foi essa pessoa quem chamou), `repos:`, objetivo com a causa raiz, ordem de
-     deploy (contrato §5).
-   - `spec.md`: **D1 = a solução escolhida**; as outras opções do passo 3 entram como "Alternativas
-     descartadas", com o motivo dado pela pessoa (ou "não escolhida por <nome>"). Achados da investigação
-     (`arquivo:linha`) vão em `pesquisa/causa-raiz.md`.
-   - Um ticket por repo: `spec.md` e `pesquisa/` ficam no ticket de quem produz o dado (ordem de deploy). Os
-     outros não decidem nada: sem spec, citam `tickets/NNN D1` no objetivo, e o card usa
-     `depende_de: [NNN/NN]`.
-   - Cards `NN-AREA-slug.md`, **um por repo**, `natureza: bug` quando for bug, critérios de aceite verificáveis.
-   - Decisões menores que a solução abre (permissão, texto, formato): não decida sozinho. Registre em
-     `## Notas` do card como "Em aberto" e pergunte no passo 6; o que a pessoa decidir vira `D2…Dn`.
-   - **Conteúdo público** (contrato §7): nenhum dado pessoal, dado real de estudante, host de produção ou
-     credencial.
+4. **Escreva o rascunho e mostre. Pare.** Escreva o card (modelo abaixo) num arquivo no scratchpad, nunca no
+   workspace. Mostre **o texto inteiro** à QA e sugira os campos do board, com uma explicação curta de cada um:
+   - **Tipo:** Bug (algo quebrado), Melhoria (algo novo ou uma regra que muda), Ajuste (texto ou aparência);
+   - **Prioridade:** Internal-P1 (importante, fila normal), Urgent-P0 (largar tudo), Internal-P2 (pode
+     esperar);
+   - **Assunto:** Epic e Story pelo tema (`references/campos-do-board.md`); com várias telas, a Story da
+     tela onde a QA viu o problema.
 
-6. **Mostre o ticket e peça o OK para o GitHub.** Liste os arquivos e o corpo do card do board (abaixo).
-   Pergunte os campos com estes defaults: Status=To Do, Priority=Internal-P1, Flag=Bug (bug) ou Task,
-   Epic/Story/Area pelo assunto (`references/campos-do-board.md`). Na mesma pergunta: os pontos "Em aberto"
-   e, se o workspace não estiver limpo no `main`, como proceder no passo 7. Sem OK explícito, pare aqui: o
-   ticket fica local.
+   A Prioridade sobe para Urgent-P0 quando um dado certo pode ser estragado ou quando quem usa fica travado
+   sem alternativa.
 
-7. **Com o OK:** o ticket vai no `main` (contrato §5). Em outra branch ou com mudanças, pergunte como
-   proceder; nunca use `stash`, `reset` nem `checkout --` sem que a pessoa peça. No `main`: `git pull`,
-   confira se o número ainda está livre (se não estiver, renumere), commit só da pasta do ticket
-   (`git add tickets/NNN-slug`) e push. Se a permissão bloquear o push, peça para a pessoa rodar
-   `! git push`. Depois, siga **todas** as regras de
-   segurança de `references/board.md`: leituras primeiro, depois **2 escritas** pelo script. Um ticket por
-   repo → um draft por ticket, em série.
+   Area (a parte com mais trabalho) e Status (To Do) você define e só informa. Peça o OK para publicar ou os
+   ajustes. Sem OK explícito, nada vai para o GitHub.
 
-8. **Registre e relate.** No `README.md`, a linha `Board: draft <item id> em To Do, AAAA-MM-DD`; commit e
-   push. Relate os números, os links (`https://github.com/vcnafacul/workspace/tree/main/tickets/NNN-slug`)
-   e o id de cada draft.
+   **Até a QA ficar satisfeita.** Ajuste ou informação nova (outro lugar, um detalhe, um print)? Volte ao
+   passo que ela afeta: ao 2, se muda o problema; senão, só reescreva. Mostre o texto inteiro de novo e peça
+   um OK novo, porque o anterior valia para o outro texto. Repita quantas vezes for preciso. Dúvida da QA
+   sobre a explicação? Responda em linguagem de uso antes de seguir.
 
-## Corpo do card do board
+5. **Publique.** Siga **todas** as regras de `references/board.md`: leituras primeiro, depois **2 escritas**
+   pelo script, **um card só**, mesmo que o problema apareça em várias partes do sistema.
 
-Não é card de QA: nada de `[QA]` no título nem checkbox de QA.
+6. **Relate** à QA: o link do board (`https://github.com/orgs/vcnafacul/projects/2`), a coluna (To Do) e o
+   título do card.
 
-- **Título:** `NNN · <titulo do README>`.
-- **Corpo:**
+## Modelo do card
+
+**Título:** o problema numa frase de uso, sem número e sem prefixo. Ex.: "Pin do mapa volta para o centro do
+CEP ao cadastrar um cursinho".
 
 ```markdown
-Ticket [tickets/NNN](https://github.com/vcnafacul/workspace/tree/main/tickets/NNN-slug) · <bug|melhoria> · repos: <repos>
+## O que acontece
+<2–4 linhas: o problema, para quem nunca usou essa tela.>
 
-**Problema:** <o que quem usa vê, em linguagem de produto>
-**Causa raiz:** <1–2 linhas>
-**Solução escolhida:** <D1 em uma linha>
+## Onde
+- **Tela:** <nome e como chegar: menu › submenu>
+- **Perfil:** <estudante, equipe do cursinho, admin…>
+- **Ambiente:** <homologação | produção | ambos>
 
-## Cards
-- [ ] `NN` · <repo> · <título do card>
+## Como reproduzir
+1. <passo, com dados fictícios>
+2. …
+
+**Esperado:** <o que deveria acontecer>
+**Acontece:** <o que acontece>
+
+<!-- Pedido de melhoria (algo novo, não quebrado): troque "Como reproduzir" por "Como é hoje"
+(o caminho atual, passo a passo) e "Esperado/Acontece" por "O que se quer" (o resultado para quem usa,
+sem desenhar tela). -->
+
+
+## Impacto
+<Quem é afetado, o que fica salvo errado, quem vê o erro depois, com que frequência.>
+
+## Também acontece em
+- <outra tela ou fluxo, e em que condição> (ou "Não encontrei em outros lugares.")
+
+## Por que acontece
+<A regra que o sistema segue hoje, em linguagem de uso, com um exemplo. Se parte do relato é a regra
+funcionando, diga aqui.>
+
+## Sugestões de caminho
+_Sugestões para quem for desenvolver. A decisão é de quem pegar o card._
+- <caminho, pelo efeito para quem usa>
+
+## Observações
+<Se foi reproduzido pela QA, se a explicação veio da análise do funcionamento, desde quando acontece.>
 ```
 
 ## Racionalizações
 
 | Desculpa | Realidade |
 |---|---|
-| "A solução é óbvia, já escrevo a D1" | Quem pediu escolhe. Mostre as opções, mesmo que sejam duas |
-| "Escrevo os arquivos e peço revisão depois" | Revisar um ticket pronto empurra para o sim. Arquivo só depois das escolhas |
-| "São dois repos do mesmo bug, é um ticket só" | Pode ser, mas quem decide é a pessoa (passo 4) |
-| "Uso o formato da ticket-para-board" | Aquele é para QA de série entregue. Aqui é o corpo acima |
-| "Sobe pro board" no pedido já é o OK | O OK é para o corpo e os campos mostrados no passo 6 |
+| "Ponho o arquivo e a linha para o dev achar rápido" | O dev investiga de novo, com o código na mão. No card, isso é ruído e envelhece |
+| "Linko o ticket com os detalhes" | Não há ticket ainda. O card se explica sozinho |
+| "Pergunto à QA qual solução prefere" | Solução é decisão de quem desenvolve. A QA confirma o problema |
+| "Crio logo o `tickets/NNN` para adiantar" | Quem cria é o dev, quando pegar o card |
+| "São duas partes do sistema, faço dois cards" | Um problema, um card. O dev decide como dividir |
+| "'Sobe pro board' já é o OK" | O OK é para o texto mostrado no passo 4 |
+| "Ela já tinha dado OK, a mudança é pequena" | Texto mudou, OK novo |
+| "É criativo, então começo pelo brainstorming" | Para relato da QA, esta skill. Brainstorming é do dev, depois |
 
 ## Red flags
-- Escrever `spec.md` antes da resposta do passo 3
-- Repos afetados > 1 e nenhuma pergunta sobre o recorte
-- `gh` de escrita fora de `scripts/criar-card.sh`, ou antes do OK do passo 6
+- No card ou na conversa: link, caminho, `arquivo:linha`, nome de função, componente, repo, "api", "client"
+- Pergunta à QA do tipo "qual solução você prefere?"
+- Qualquer escrita em `tickets/` ou `git commit`
+- `gh` de escrita fora de `scripts/criar-card.sh`, ou antes do OK do passo 4
