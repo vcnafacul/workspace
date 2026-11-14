@@ -8,13 +8,13 @@ criações de conteúdo por minuto e 500 por hora, e o flag vem antes disso. A r
 
 | Operação | Quantidade |
 |---|---|
-| Draft no Project #2 (`gh project item-create`) | **1** por ticket |
+| Draft no Project #2 (`gh project item-create`) | **1** por problema |
 | Mutation GraphQL de campos | **1**, com aliases |
 | `gh issue create`, labels, discussions, comentários, sub-issues, `gh issue edit` | **0** |
 | Paralelismo, retry em 403/429/"secondary rate limit" | **0** |
 
 `scripts/criar-card.sh` faz as 2 escritas em série, com 2 s entre elas, e para no primeiro erro. Não rode `gh`
-de escrita fora dele. Vários tickets: um script por vez, com pelo menos 1 min entre eles.
+de escrita fora dele. Um card por problema; vários problemas: um script por vez, com pelo menos 1 min entre eles.
 
 ## Antes de escrever (leituras)
 
@@ -27,7 +27,7 @@ gh api rate_limit                                                    # core ou g
 
 ```bash
 FLAG=14014d75 EPIC=<id> STORY=<id> AREA=<id> \
-  .claude/skills/criar-ticket/scripts/criar-card.sh "<NNN · título>" <arquivo-do-corpo.md>
+  .claude/skills/criar-ticket/scripts/criar-card.sh "<título>" <arquivo-do-corpo.md>
 ```
 
 Ids em `campos-do-board.md`. `DRY_RUN=1` mostra os comandos sem escrever. O corpo vai num arquivo temporário
