@@ -7,6 +7,8 @@ responsavel: cleytonbiffe
 repos: [client-vcnafacul, docs]
 ---
 
+Board: draft PVTI_lADOB6mE5M4AjJiBzhIxfaE em To Do, 2026-11-14
+
 ## Objetivo
 
 **O problema.** Ao cadastrar um cursinho no Localiza Cursinho, a pessoa marca no mapa onde ele fica, e o pin
