@@ -1,0 +1,411 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway. Wayfinder ticket: "Core components visual prototype" (343-design-system/tickets/10-core-components-prototype.md)
+  Question: what do the core components look like (variants, states, sizes) with the decided tokens?
+  Everything is drawn with the DECIDED tokens only: colors ("Color palette"), type steps ("Type scale"),
+  radius / shadows / z-index / widths ("Spacing, radius, shadows and breakpoints").
+  Three presets, switchable via ?variant=A|B|C (bottom bar or ← →); width via the bar (?w=mobile):
+    A — Compact: 36px controls, 40px table rows, dialogs stay centered on mobile, tables scroll sideways
+    B — Comfortable: 40px controls, 48px rows, dialogs become bottom sheets on mobile
+    C — Adaptive: 36px controls on desktop / 44px touch targets on mobile, 40px rows,
+        tables collapse to cards under 768px, dialogs go full-screen on mobile
+  States (hover, focus, disabled, …) are drawn statically so every one is visible at once.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PROTOTYPE — Core components (#343)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  /* ---------- decided tokens ---------- */
+  :root {
+    --background:#FFFFFF; --foreground:#0B2747; --card:#FFFFFF; --card-foreground:#0B2747; --popover:#FFFFFF; --popover-foreground:#0B2747;
+    --page:#F7FAFF; --primary:#0B2747; --primary-foreground:#FFFFFF; --secondary:#EBF1F8; --secondary-foreground:#0B2747;
+    --muted:#EBF1F8; --muted-foreground:#555B64; --accent:#E8F2FE; --accent-foreground:#0B2747;
+    --cta:#B35300; --cta-foreground:#FFFFFF; --border:#DAE0E8; --input:#8B939D; --ring:#C55A00;
+    --destructive:#C5131D; --destructive-foreground:#FFFFFF; --destructive-muted:#FFF8F7;
+    --success:#006352; --success-foreground:#FFFFFF; --success-muted:#EDFFF9;
+    --warning:#856500; --warning-foreground:#FFFFFF; --warning-muted:#FFF8CC;
+    --info:#346CA3; --info-foreground:#FFFFFF; --info-muted:#F6FBFF;
+    --radius:8px;
+    --shadow-sm: 0 1px 2px rgba(11,39,71,.08);
+    --shadow-md: 0 4px 12px rgba(11,39,71,.10), 0 1px 3px rgba(11,39,71,.06);
+    --shadow-lg: 0 16px 40px rgba(11,39,71,.18), 0 2px 8px rgba(11,39,71,.08);
+    --control-h: 36px; --row-h: 40px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6e8ec; font-family: ui-sans-serif, system-ui, sans-serif; color: #111; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 24px 16px 120px; }
+  .chrome h1 { font-size: 18px; margin: 0 0 4px; }
+  .chrome .lede { font-size: 13px; color: #444; max-width: 980px; }
+  .chrome .lede li { margin: 2px 0; }
+  .toc { font: 12px ui-sans-serif, system-ui; display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 10px 0 0; }
+  .toc a { color: #333; }
+
+  /* the device frame; everything inside uses only tokens */
+  .frame { margin: 16px auto 0; font-family: Raleway, sans-serif; color: var(--foreground); background: var(--page); border: 1px solid #c9ced6; border-radius: 12px; padding: 24px; transition: max-width .2s; }
+  .frame.mobile { max-width: 390px; padding: 16px; }
+  section.ds { margin-bottom: 40px; }
+  section.ds > .sh { display: flex; align-items: baseline; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-bottom: 16px; }
+  section.ds > .sh .note { color: var(--muted-foreground); }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .grid2 { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; }
+  .mobile .grid2 { grid-template-columns: 1fr; }
+  .cell { display: grid; gap: 8px; align-content: start; }
+  .tag { font: 11px ui-monospace, monospace; color: #6b7280; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .stack { display: grid; gap: 8px; }
+
+  /* type steps (desktop; .mobile overrides) */
+  .text-display{font-size:60px;line-height:1.05;font-weight:800;letter-spacing:-.01em}
+  .text-h1{font-size:30px;line-height:1.2;font-weight:700} .text-h2{font-size:24px;line-height:1.25;font-weight:700}
+  .text-h3{font-size:18px;line-height:1.3;font-weight:600} .text-h4{font-size:16px;line-height:1.4;font-weight:600}
+  .text-prose{font-size:17px;line-height:1.7} .text-body{font-size:14px;line-height:1.5} .text-body-sm{font-size:13px;line-height:1.45}
+  .text-caption{font-size:12px;line-height:1.4;font-weight:500} .text-label{font-size:13px;line-height:1.3;font-weight:600}
+  .text-button{font-size:14px;line-height:1;font-weight:600} .text-overline{font-size:12px;line-height:1.3;font-weight:700;text-transform:uppercase;letter-spacing:.16em}
+  .text-numeric{font-size:28px;line-height:1.1;font-weight:700;font-variant-numeric:tabular-nums}
+  .mobile .text-display{font-size:36px} .mobile .text-h1{font-size:24px} .mobile .text-h2{font-size:20px} .mobile .text-h3{font-size:16px} .mobile .text-h4{font-size:14px} .mobile .text-prose{font-size:16px} .mobile .text-numeric{font-size:24px}
+  h1,h2,h3,h4,p { margin: 0; }
+  .muted { color: var(--muted-foreground); }
+
+  .ico { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .ico.lg { width: 20px; height: 20px; }
+  .spin { animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- Button ---------- */
+  .btn { font-family: Raleway, sans-serif; font-size: 14px; font-weight: 600; line-height: 1; height: var(--control-h); padding: 0 16px; border-radius: 6px; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; white-space: nowrap; }
+  .btn.sm { height: calc(var(--control-h) - 4px); padding: 0 12px; font-size: 13px; }
+  .btn.lg { height: calc(var(--control-h) + 8px); padding: 0 24px; font-size: 15px; }
+  .btn.icon { width: var(--control-h); padding: 0; }
+  .b-cta { background: var(--cta); color: var(--cta-foreground); }
+  .b-cta.hover { background: color-mix(in srgb, var(--cta) 88%, black); }
+  .b-primary { background: var(--primary); color: var(--primary-foreground); }
+  .b-primary.hover { background: color-mix(in srgb, var(--primary) 88%, white); }
+  .b-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+  .b-secondary.hover { background: color-mix(in srgb, var(--secondary) 80%, var(--primary) 8%); }
+  .b-outline { background: var(--background); color: var(--foreground); border-color: var(--input); }
+  .b-outline.hover { background: var(--accent); }
+  .b-ghost { background: transparent; color: var(--foreground); }
+  .b-ghost.hover { background: var(--accent); }
+  .b-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+  .b-destructive.hover { background: color-mix(in srgb, var(--destructive) 88%, black); }
+  .b-link { background: transparent; color: var(--primary); text-decoration: underline; text-underline-offset: 3px; padding: 0 4px; }
+  .btn.focus, .focus-ring { outline: none; box-shadow: 0 0 0 2px var(--background), 0 0 0 4px var(--ring); }
+  .btn[disabled], .btn.disabled { opacity: .5; cursor: not-allowed; }
+  .btn.active { transform: translateY(1px); }
+
+  /* ---------- Fields ---------- */
+  .field { display: grid; gap: 6px; }
+  .field label { font-size: 13px; font-weight: 600; }
+  .field .req { color: var(--destructive); margin-left: 2px; }
+  .field .hint { font-size: 12px; font-weight: 500; color: var(--muted-foreground); }
+  .field .err { font-size: 12px; font-weight: 500; color: var(--muted-foreground); display: flex; gap: 6px; align-items: center; }
+  .field .err .ico { color: var(--destructive); width: 14px; height: 14px; }
+  .input { font-family: Raleway, sans-serif; font-size: 14px; height: var(--control-h); width: 100%; padding: 0 12px; border-radius: 6px; border: 1px solid var(--input); background: var(--background); color: var(--foreground); display: flex; align-items: center; gap: 8px; }
+  .input.ta { height: auto; min-height: 80px; padding: 8px 12px; align-items: flex-start; line-height: 1.5; }
+  .input .ph { color: var(--muted-foreground); }
+  .input.invalid { border-color: var(--destructive); }
+  .input.disabled { background: var(--muted); opacity: .6; }
+  .input .end { margin-left: auto; color: var(--muted-foreground); display: flex; }
+  .cb { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--input); background: var(--background); display: inline-grid; place-items: center; flex: none; }
+  .cb.on, .cb.ind { background: var(--primary); border-color: var(--primary); color: var(--primary-foreground); }
+  .cb .ico { width: 12px; height: 12px; stroke-width: 3; }
+  .rd { width: 16px; height: 16px; border-radius: 99px; border: 1px solid var(--input); background: var(--background); display: inline-grid; place-items: center; flex: none; }
+  .rd.on { border-color: var(--primary); } .rd.on::after { content: ""; width: 8px; height: 8px; border-radius: 99px; background: var(--primary); }
+  .opt { display: flex; gap: 8px; align-items: center; font-size: 14px; min-height: 24px; }
+  .mobile.touch .opt { min-height: 44px; }
+  .sw { width: 36px; height: 20px; border-radius: 99px; background: var(--input); position: relative; flex: none; }
+  .sw::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 99px; background: #fff; box-shadow: var(--shadow-sm); }
+  .sw.on { background: var(--primary); } .sw.on::after { left: 18px; }
+  .disabled-o { opacity: .5; }
+
+  /* ---------- Surfaces ---------- */
+  .card { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 8px; }
+  .card .ch { padding: 16px 16px 0; display: grid; gap: 4px; } .card .cc { padding: 16px; } .card .cf { padding: 0 16px 16px; display: flex; gap: 8px; justify-content: flex-end; }
+  .pop { background: var(--popover); color: var(--popover-foreground); border: 1px solid var(--border); border-radius: 8px; box-shadow: var(--shadow-md); }
+  .menu { padding: 4px; min-width: 200px; }
+  .menu .mi { display: flex; align-items: center; gap: 8px; padding: 0 8px; height: 32px; border-radius: 6px; font-size: 14px; }
+  .mobile.touch .menu .mi { height: 44px; }
+  .menu .mi.hl { background: var(--accent); }
+  .menu .mi.danger { color: var(--destructive); }
+  .menu .mi .kbd { margin-left: auto; font-size: 12px; color: var(--muted-foreground); }
+  .menu .sep { height: 1px; background: var(--border); margin: 4px -4px; }
+  .menu .lbl { font-size: 12px; font-weight: 600; color: var(--muted-foreground); padding: 6px 8px; }
+  .tooltip { background: var(--primary); color: var(--primary-foreground); font-size: 12px; font-weight: 500; padding: 6px 10px; border-radius: 6px; display: inline-block; box-shadow: var(--shadow-md); }
+
+  /* overlays drawn inline */
+  .stage { position: relative; background: color-mix(in srgb, var(--foreground) 55%, transparent); border-radius: 8px; padding: 32px 16px; display: grid; place-items: center; min-height: 300px; overflow: hidden; }
+  .dialog { background: var(--background); border-radius: 12px; box-shadow: var(--shadow-lg); width: 100%; display: grid; gap: 16px; padding: 24px; position: relative; }
+  .dialog .x { position: absolute; top: 12px; right: 12px; }
+  .dialog .df { display: flex; gap: 8px; justify-content: flex-end; }
+  .stage.bottom { place-items: end center; padding: 32px 0 0; }
+  .stage.bottom .dialog { border-radius: 12px 12px 0 0; }
+  .stage.full { padding: 0; place-items: stretch; }
+  .stage.full .dialog { border-radius: 0; min-height: 300px; align-content: start; }
+  .stage.full .df, .stage.bottom .df { flex-direction: column-reverse; }
+  .stage.full .df .btn, .stage.bottom .df .btn { width: 100%; }
+  .sheet { position: absolute; top: 0; right: 0; bottom: 0; width: min(340px, 90%); background: var(--background); box-shadow: var(--shadow-lg); padding: 20px; display: grid; gap: 12px; align-content: start; border-radius: 12px 0 0 12px; }
+
+  /* ---------- Table ---------- */
+  .dt-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .dt-tools { display: flex; gap: 8px; align-items: center; padding: 12px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+  .dt-tools .grow { flex: 1; min-width: 160px; }
+  .dt-sel { display: flex; gap: 8px; align-items: center; padding: 8px 12px; background: var(--accent); border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 600; }
+  .dt-scroll { overflow-x: auto; }
+  table.dt { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 620px; }
+  table.dt th { text-align: left; height: 36px; padding: 0 12px; font-size: 12px; font-weight: 600; color: var(--muted-foreground); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.dt th .sort { display: inline-flex; gap: 4px; align-items: center; }
+  table.dt th.sorted { color: var(--foreground); }
+  table.dt td { height: var(--row-h); padding: 0 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  table.dt tr.sel td { background: var(--accent); }
+  table.dt tr.hov td { background: var(--page); }
+  table.dt td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .dt-foot { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; font-size: 13px; color: var(--muted-foreground); flex-wrap: wrap; gap: 8px; }
+  .dt-cards { display: none; }
+  .mobile.cards-mode .dt-scroll { display: none; }
+  .mobile.cards-mode .dt-cards { display: grid; }
+  .dt-card { padding: 12px; border-bottom: 1px solid var(--border); display: grid; gap: 6px; }
+  .dt-card.sel { background: var(--accent); }
+  .empty { padding: 40px 16px; display: grid; justify-items: center; gap: 8px; text-align: center; }
+  .empty .ico { width: 32px; height: 32px; color: var(--muted-foreground); }
+
+  /* ---------- Badges, alerts, toasts ---------- */
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; height: 22px; padding: 0 8px; border-radius: 999px; white-space: nowrap; }
+  .bd-default { background: var(--primary); color: var(--primary-foreground); }
+  .bd-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+  .bd-outline { border: 1px solid var(--border); color: var(--foreground); }
+  .dot { width: 7px; height: 7px; border-radius: 99px; display: inline-block; flex: none; }
+  .alert { display: flex; gap: 12px; padding: 12px 16px; border-radius: 8px; align-items: flex-start; }
+  .alert .ico { margin-top: 1px; }
+  .toast { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 8px; background: var(--card); border: 1px solid var(--border); box-shadow: var(--shadow-md); width: 100%; max-width: 360px; }
+  .toast .x { margin-left: auto; color: var(--muted-foreground); }
+
+  /* tabs, pagination, skeleton, calendar */
+  .tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+  .tab { height: var(--control-h); padding: 0 12px; display: inline-flex; align-items: center; font-size: 14px; font-weight: 600; color: var(--muted-foreground); border-bottom: 2px solid transparent; margin-bottom: -1px; }
+  .tab.on { color: var(--foreground); border-bottom-color: var(--primary); }
+  .pg { display: flex; gap: 4px; align-items: center; }
+  .pg .btn { min-width: var(--control-h); padding: 0 8px; }
+  .sk { background: color-mix(in srgb, var(--primary) 10%, transparent); border-radius: 6px; animation: pulse 2s ease-in-out infinite; }
+  @keyframes pulse { 50% { opacity: .5; } }
+  .cal { padding: 12px; width: 280px; }
+  .cal .hd { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .cal .gr { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; font-size: 13px; }
+  .cal .gr .w { font-size: 12px; color: var(--muted-foreground); font-weight: 600; height: 28px; display: grid; place-items: center; }
+  .cal .gr .d { height: 34px; display: grid; place-items: center; border-radius: 6px; }
+  .cal .gr .d.out { color: var(--muted-foreground); opacity: .6; }
+  .cal .gr .d.today { box-shadow: inset 0 0 0 1px var(--input); }
+  .cal .gr .d.sel { background: var(--primary); color: var(--primary-foreground); font-weight: 700; }
+  .cal .gr .d.range { background: var(--accent); border-radius: 0; }
+
+  /* chrome */
+  .switch { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; align-items: center; background: #000; color: #fff; border-radius: 999px; padding: 8px 14px; font: 13px ui-sans-serif, system-ui; box-shadow: 0 8px 24px rgba(0,0,0,.35); z-index: 100; }
+  .switch button { background: none; border: 0; color: #fff; font-size: 13px; cursor: pointer; padding: 2px 8px; border-radius: 6px; }
+  .switch button.on { background: #fff; color: #000; }
+  .switch #label { min-width: 200px; text-align: center; }
+  pre.state { font: 11px ui-monospace, monospace; background: #fff; border: 1px dashed #aaa; border-radius: 8px; padding: 10px; white-space: pre-wrap; margin-top: 16px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="chrome">
+    <h1 id="vtitle"></h1>
+    <div class="lede" id="vdesc"></div>
+    <div class="toc" id="toc"></div>
+  </div>
+  <div class="frame" id="frame"></div>
+  <pre class="state" id="state"></pre>
+</div>
+<div class="switch">
+  <button id="prev">◀</button><span id="label"></span><button id="next">▶</button>
+  <span style="opacity:.4">|</span>
+  <button data-w="desktop" class="w">desktop</button><button data-w="mobile" class="w">mobile 390</button>
+</div>
+
+<script>
+const P = {
+  check:'<path d="M20 6 9 17l-5-5"/>', x:'<path d="M18 6 6 18"/><path d="m6 6 12 12"/>', down:'<path d="m6 9 6 6 6-6"/>',
+  left:'<path d="m15 18-6-6 6-6"/>', right:'<path d="m9 18 6-6-6-6"/>', minus:'<path d="M5 12h14"/>',
+  cal:'<rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>',
+  search:'<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
+  more:'<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  loader:'<path d="M21 12a9 9 0 1 1-6.219-8.56"/>', plus:'<path d="M5 12h14"/><path d="M12 5v14"/>',
+  trash:'<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>',
+  pencil:'<path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>',
+  copy:'<rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  warn:'<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  ok:'<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>', err:'<circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/>',
+  sort:'<path d="m21 16-4 4-4-4"/><path d="M17 20V4"/><path d="m3 8 4-4 4 4"/><path d="M7 4v16"/>', sortdown:'<path d="M12 5v14"/><path d="m19 12-7 7-7-7"/>',
+  filter:'<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>',
+  inbox:'<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  eye:'<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>',
+};
+const I = (n, c='') => `<svg class="ico ${c}" viewBox="0 0 24 24">${P[n]}</svg>`;
+
+const VARIANTS = {
+  A: { name:'Compact', controlH:{d:36,m:36}, rowH:40, mobileTable:'scroll', mobileDialog:'center',
+       desc:['<b>36px controls</b> everywhere, <b>40px table rows</b> (dashV2\'s current density).','On mobile, tables <b>scroll sideways</b> and dialogs stay <b>centered</b>.','Closest to the app today. On phones, rows and menu items are below the 44px touch target.'] },
+  B: { name:'Comfortable', controlH:{d:40,m:40}, rowH:48, mobileTable:'scroll', mobileDialog:'bottom',
+       desc:['<b>40px controls</b>, <b>48px table rows</b>: roomier everywhere, about 20% fewer rows per screen.','On mobile, tables scroll sideways and dialogs become <b>bottom sheets</b> with full-width buttons.','Friendlier, but it spends admin density for a touch comfort only phones need.'] },
+  C: { name:'Adaptive', controlH:{d:36,m:44}, rowH:40, mobileTable:'cards', mobileDialog:'full', touch:true,
+       desc:['<b>Desktop = Compact</b> (36px controls, 40px rows). <b>Mobile: 44px touch targets</b> for controls, options and menu items.','Under 768px, <b>tables collapse into cards</b> (title, status, key fields, actions) instead of scrolling sideways.','Dialogs go <b>full-screen</b> on mobile with stacked full-width buttons. Each width gets the density it needs, at the cost of two layouts per table.'] },
+};
+let cur = new URLSearchParams(location.search).get('variant') || 'C'; if (!VARIANTS[cur]) cur='C';
+let mode = new URLSearchParams(location.search).get('w') || 'desktop';
+
+const SECTIONS = [];
+const sec = (id, title, note, html) => { SECTIONS.push([id,title]); return `<section class="ds" id="${id}"><div class="sh"><h2 class="text-h2">${title}</h2><span class="text-body-sm note">${note}</span></div>${html}</section>`; };
+const cell = (tag, html) => `<div class="cell"><span class="tag">${tag}</span>${html}</div>`;
+
+function buttons() {
+  const vs = ['cta','primary','secondary','outline','ghost','destructive','link'];
+  const lab = {cta:'+ Nova prova',primary:'Salvar',secondary:'Duplicar',outline:'Filtros',ghost:'Cancelar',destructive:'Excluir',link:'Ver detalhes'};
+  const states = [['default',''],['hover','hover'],['focus-visible','focus'],['active','active'],['disabled','disabled'],['loading','loading']];
+  const grid = `<div class="dt-wrap" style="overflow-x:auto"><table class="dt" style="min-width:760px"><thead><tr><th>variant</th>${states.map(s=>`<th>${s[0]}</th>`).join('')}</tr></thead><tbody>
+    ${vs.map(v=>`<tr><td class="text-caption">${v}</td>${states.map(([n,c])=>`<td style="height:56px">${
+      c==='loading' ? `<button class="btn b-${v}" disabled style="opacity:.8">${I('loader','spin')}${lab[v]}</button>` :
+      `<button class="btn b-${v} ${c}" ${c==='disabled'?'disabled':''}>${lab[v]}</button>`}</td>`).join('')}</tr>`).join('')}
+  </tbody></table></div>`;
+  const sizes = `<div class="grid" style="margin-top:16px">
+    ${cell('sizes: sm · md (default) · lg', `<div class="row"><button class="btn sm b-primary">Pequeno</button><button class="btn b-primary">Médio</button><button class="btn lg b-primary">Grande</button></div>`)}
+    ${cell('icon + label · icon-only (needs aria-label)', `<div class="row"><button class="btn b-outline">${I('filter')}Filtros</button><button class="btn b-cta">${I('plus')}Nova prova</button><button class="btn icon b-ghost" aria-label="Mais ações">${I('more')}</button><button class="btn icon b-outline" aria-label="Editar">${I('pencil')}</button></div>`)}
+    ${cell('rule: at most one cta per screen', `<div class="row"><button class="btn b-ghost">Cancelar</button><button class="btn b-primary">Salvar rascunho</button><button class="btn b-cta">Publicar prova</button></div>`)}
+  </div>`;
+  return sec('buttons','Button','7 variants × 6 states · cva', grid+sizes);
+}
+
+function fields() {
+  const f = (label, inner, extra='', req=false) => `<div class="field"><label>${label}${req?'<span class="req" aria-hidden="true">*</span>':''}</label>${inner}${extra}</div>`;
+  return sec('fields','Form fields','label · control · hint or error', `<div class="grid">
+    ${cell('Input · default', f('Nome da prova', `<div class="input"><span class="ph">Ex.: ENEM 2025</span></div>`, `<span class="hint">Aparece para os alunos na lista de simulados.</span>`, true))}
+    ${cell('Input · focus-visible', f('Nome da prova', `<div class="input focus-ring">ENEM 2025</div>`, '', true))}
+    ${cell('Input · invalid (red border, neutral message)', f('Ano', `<div class="input invalid">20255</div>`, `<span class="err">${I('err')}Ano deve ter 4 dígitos.</span>`, true))}
+    ${cell('Input · disabled', f('Código', `<div class="input disabled">ENEM-2019-A</div>`))}
+    ${cell('Input · with icon', f('Buscar', `<div class="input">${I('search')}<span class="ph">Buscar prova…</span></div>`))}
+    ${cell('Password', f('Senha', `<div class="input">••••••••<span class="end">${I('eye')}</span></div>`))}
+    ${cell('Textarea', f('Observações', `<div class="input ta"><span class="ph">Escreva aqui…</span></div>`, `<span class="hint">0 / 500</span>`))}
+    ${cell('Select · closed', f('Frente', `<div class="input">Matemática<span class="end">${I('down')}</span></div>`))}
+    ${cell('Select · open', f('Frente', `<div class="input focus-ring">Matemática<span class="end">${I('down')}</span></div><div class="pop menu"><div class="mi">Linguagens</div><div class="mi hl">${I('check')}Matemática</div><div class="mi">Natureza</div><div class="mi">Humanas</div></div>`))}
+    ${cell('Checkbox', `<div class="stack"><span class="opt"><span class="cb on">${I('check')}</span>Prova oficial</span><span class="opt"><span class="cb"></span>Reaplicação</span><span class="opt"><span class="cb ind">${I('minus')}</span>Selecionar todas (parcial)</span><span class="opt disabled-o"><span class="cb"></span>Desativada</span><span class="opt"><span class="cb focus-ring"></span>Com foco</span></div>`)}
+    ${cell('RadioGroup', `<div class="stack"><span class="opt"><span class="rd on"></span>Presencial</span><span class="opt"><span class="rd"></span>Online</span><span class="opt disabled-o"><span class="rd"></span>Híbrido (indisponível)</span></div>`)}
+    ${cell('Switch', `<div class="stack"><span class="opt"><span class="sw on"></span>Inscrições abertas</span><span class="opt"><span class="sw"></span>Notificar por e-mail</span><span class="opt disabled-o"><span class="sw"></span>Desativado</span></div>`)}
+    ${cell('DatePicker · open (react-day-picker)', f('Data da prova', `<div class="input focus-ring">${I('cal')}12/11/2026</div>${calendar(false)}`))}
+    ${cell('DateRangePicker · open', f('Período', `<div class="input">${I('cal')}03/11 – 07/11/2026</div>${calendar(true)}`))}
+  </div>`);
+}
+function calendar(range) {
+  const days = []; for (let i=26;i<=31;i++) days.push([i,'out']); for (let i=1;i<=30;i++) days.push([i,'']); for (let i=1;i<=6;i++) days.push([i,'out']);
+  return `<div class="pop cal"><div class="hd"><button class="btn icon sm b-ghost" aria-label="Mês anterior">${I('left')}</button><span class="text-label">novembro 2026</span><button class="btn icon sm b-ghost" aria-label="Próximo mês">${I('right')}</button></div>
+    <div class="gr">${['D','S','T','Q','Q','S','S'].map(w=>`<span class="w">${w}</span>`).join('')}${days.map(([d,c],i)=>{
+      let cl=c; if(!c){ if(!range && d===12) cl='sel'; if(range && (d===3||d===7)) cl='sel'; else if(range && d>3 && d<7) cl='range'; if(d===28) cl+=' today'; }
+      return `<span class="d ${cl}">${d}</span>`; }).join('')}</div></div>`;
+}
+
+function status(kind, text, look) {
+  const col = {success:'var(--success)',warning:'var(--warning)',destructive:'var(--destructive)',info:'var(--info)',neutral:'var(--muted-foreground)'}[kind];
+  if (look==='dot') return `<span class="badge" style="background:var(--muted);color:var(--foreground)"><span class="dot" style="background:${col}"></span>${text}</span>`;
+  if (kind==='neutral') return `<span class="badge" style="background:var(--muted);color:var(--muted-foreground)">${text}</span>`;
+  return `<span class="badge" style="background:var(--${kind}-muted);color:${col}"><span class="dot" style="background:${col}"></span>${text}</span>`;
+}
+
+function table(v) {
+  const rows = [
+    ['ENEM 2019 — 1ª aplicação','2019','180/180','success','Concluída',true],
+    ['ENEM 2019 — reaplicação','2019','172/180','destructive','Faltando questões',true],
+    ['FUVEST 2024','2024','90/90','warning','Em andamento',false],
+    ['Simulado Nacional 3','2026','0/45','info','Agendada',false],
+    ['UNICAMP 2023','2023','—','neutral','Rascunho',false],
+  ];
+  const tools = `<div class="dt-tools"><div class="input grow">${I('search')}<span class="ph">Buscar prova…</span></div><button class="btn b-outline">${I('filter')}Filtros<span class="badge bd-default" style="height:18px;padding:0 6px">2</span></button><button class="btn b-cta">${I('plus')}Nova prova</button></div>
+    <div class="dt-sel"><span class="cb ind">${I('minus')}</span>2 selecionadas<span style="flex:1"></span><button class="btn sm b-ghost">Exportar</button><button class="btn sm b-ghost" style="color:var(--destructive)">${I('trash')}Excluir</button></div>`;
+  const tbl = `<div class="dt-scroll"><table class="dt"><thead><tr><th style="width:40px"><span class="cb ind">${I('minus')}</span></th><th class="sorted"><span class="sort">Prova ${I('sortdown')}</span></th><th><span class="sort">Ano ${I('sort')}</span></th><th style="text-align:right">Questões</th><th>Status</th><th style="width:48px"></th></tr></thead><tbody>
+    ${rows.map((r,i)=>`<tr class="${r[5]?'sel':''} ${i===2?'hov':''}"><td><span class="cb ${r[5]?'on':''}">${r[5]?I('check'):''}</span></td><td>${r[0]}</td><td class="muted">${r[1]}</td><td class="num muted">${r[2]}</td><td>${status(r[3],r[4],'dot')}</td><td><button class="btn icon sm b-ghost" aria-label="Ações">${I('more')}</button></td></tr>`).join('')}
+  </tbody></table></div>
+  <div class="dt-cards">${rows.map(r=>`<div class="dt-card ${r[5]?'sel':''}"><div class="row" style="justify-content:space-between;flex-wrap:nowrap"><span class="row" style="flex-wrap:nowrap"><span class="cb ${r[5]?'on':''}">${r[5]?I('check'):''}</span><b class="text-body" style="font-weight:600">${r[0]}</b></span><button class="btn icon sm b-ghost" aria-label="Ações">${I('more')}</button></div><div class="row text-body-sm muted">${r[1]} · ${r[2]} questões</div><div>${status(r[3],r[4],'dot')}</div></div>`).join('')}</div>`;
+  const foot = `<div class="dt-foot"><span>Mostrando 1–5 de 128</span><div class="pg"><button class="btn sm b-ghost" aria-label="Anterior">${I('left')}</button><button class="btn sm b-primary">1</button><button class="btn sm b-ghost">2</button><button class="btn sm b-ghost">3</button><span>…</span><button class="btn sm b-ghost">26</button><button class="btn sm b-ghost" aria-label="Próxima">${I('right')}</button></div></div>`;
+  const empty = `<div class="dt-wrap"><div class="empty">${I('inbox')}<p class="text-h4">Nenhuma prova encontrada</p><p class="text-body-sm muted">Tente outros filtros ou crie uma nova prova.</p><div class="row"><button class="btn b-outline">Limpar filtros</button></div></div></div>`;
+  const loading = `<div class="dt-wrap" style="padding:12px;display:grid;gap:10px">${[70,90,60,80,50].map(w=>`<div class="row" style="flex-wrap:nowrap"><div class="sk" style="width:16px;height:16px"></div><div class="sk" style="height:14px;width:${w}%"></div><div class="sk" style="height:14px;width:12%"></div></div>`).join('')}</div>`;
+  return sec('table','DataTable','from dashV2 DashTable · selection · server sort/pagination · dot StatusBadge', `<div class="dt-wrap">${tools}${tbl}${foot}</div>
+    <div class="grid2" style="margin-top:16px">${cell('empty', empty)}${cell('loading (Skeleton rows)', loading)}</div>`);
+}
+
+function overlays(v) {
+  const md = mode==='mobile' ? v.mobileDialog : 'center';
+  const stageCls = md==='bottom' ? 'bottom' : md==='full' ? 'full' : '';
+  const dialog = `<div class="stage ${stageCls}"><div class="dialog" style="max-width:560px"><button class="btn icon sm b-ghost x" aria-label="Fechar">${I('x')}</button>
+    <div style="display:grid;gap:4px"><h3 class="text-h3">Nova prova</h3><p class="text-body-sm muted">Preencha os dados básicos. Você poderá adicionar questões depois.</p></div>
+    <div class="field"><label>Nome da prova<span class="req">*</span></label><div class="input focus-ring">ENEM 2025</div></div>
+    <div class="field"><label>Ano</label><div class="input">2025</div></div>
+    <div class="df"><button class="btn b-outline">Cancelar</button><button class="btn b-primary">Criar prova</button></div></div></div>`;
+  const alertD = `<div class="stage ${stageCls}"><div class="dialog" style="max-width:400px"><div style="display:grid;gap:6px"><h3 class="text-h3">Excluir “ENEM 2019 — reaplicação”?</h3><p class="text-body muted">As 172 questões vinculadas continuam no banco. Esta ação não pode ser desfeita.</p></div>
+    <div class="df"><button class="btn b-outline">Cancelar</button><button class="btn b-destructive">Excluir prova</button></div></div></div>`;
+  const sheet = `<div class="stage" style="place-items:stretch;padding:0"><div class="sheet"><div class="row" style="justify-content:space-between"><h3 class="text-h3">Filtros</h3><button class="btn icon sm b-ghost" aria-label="Fechar">${I('x')}</button></div>
+    <div class="field"><label>Status</label><div class="input">Todos<span class="end">${I('down')}</span></div></div><div class="field"><label>Ano</label><div class="input">2019<span class="end">${I('down')}</span></div></div>
+    <span class="opt"><span class="cb on">${I('check')}</span>Só provas oficiais</span><div class="row" style="justify-content:flex-end;margin-top:8px"><button class="btn b-ghost">Limpar</button><button class="btn b-primary">Aplicar</button></div></div></div>`;
+  return sec('overlays','Dialog · AlertDialog · Sheet', `Radix · focus trap · Esc · size sm 400 / md 560 / lg 800 · mobile: ${mode==='mobile'?{center:'centered',bottom:'bottom sheet',full:'full-screen'}[v.mobileDialog]:'(switch to mobile)'}`,
+    `<div class="grid2">${cell('Dialog size md', dialog)}${cell('AlertDialog size sm · destructive', alertD)}</div><div style="margin-top:16px">${cell('Sheet (right)', sheet)}</div>`);
+}
+
+function menus() {
+  return sec('menus','DropdownMenu · Popover · Tooltip','shadow-md · z-popover above dialogs', `<div class="grid">
+    ${cell('DropdownMenu (row actions)', `<div class="row"><button class="btn icon b-outline focus-ring" aria-label="Ações">${I('more')}</button></div><div class="pop menu"><div class="lbl">ENEM 2019</div><div class="mi hl">${I('pencil')}Editar<span class="kbd">E</span></div><div class="mi">${I('copy')}Duplicar</div><div class="mi">${I('eye')}Ver questões</div><div class="sep"></div><div class="mi danger">${I('trash')}Excluir prova</div></div>`)}
+    ${cell('Popover', `<button class="btn b-ghost">${I('info')}Como é calculado?</button><div class="pop" style="padding:12px 14px;max-width:280px"><p class="text-label">Taxa de acerto</p><p class="text-body-sm muted" style="margin-top:4px">Questões certas ÷ questões respondidas, nos últimos 30 dias.</p></div>`)}
+    ${cell('Tooltip (primary)', `<div class="row"><button class="btn icon b-outline" aria-label="Exportar CSV">${I('copy')}</button><span class="tooltip">Exportar CSV</span></div>`)}
+  </div>`);
+}
+
+function feedback() {
+  const al = (k, ic, t, m) => `<div class="alert" style="background:var(--${k}-muted)"><span style="color:var(--${k})">${I(ic)}</span><div><p class="text-label" style="color:var(--${k})">${t}</p><p class="text-body-sm" style="margin-top:2px">${m}</p></div></div>`;
+  const to = (k, ic, t, m) => `<div class="toast"><span style="color:var(--${k})">${I(ic,'lg')}</span><div><p class="text-label">${t}</p>${m?`<p class="text-body-sm muted" style="margin-top:2px">${m}</p>`:''}</div><span class="x">${I('x')}</span></div>`;
+  return sec('feedback','StatusBadge · Badge · Alert · Toast','dot in tables · tint elsewhere · react-toastify restyled', `<div class="grid">
+    ${cell('StatusBadge · dot (tables, lists)', `<div class="row">${status('success','Concluída','dot')}${status('warning','Em andamento','dot')}${status('destructive','Faltando questões','dot')}${status('info','Agendada','dot')}${status('neutral','Rascunho','dot')}</div>`)}
+    ${cell('StatusBadge · tint (standalone, detail pages)', `<div class="row">${status('success','Concluída','tint')}${status('warning','Em andamento','tint')}${status('destructive','Faltando questões','tint')}${status('info','Agendada','tint')}${status('neutral','Rascunho','tint')}</div>`)}
+    ${cell('Badge · default / secondary / outline', `<div class="row"><span class="badge bd-default">Oficial</span><span class="badge bd-secondary">2019</span><span class="badge bd-outline">Matemática</span></div>`)}
+  </div>
+  <div class="grid2" style="margin-top:16px">
+    ${cell('Alert (tinted)', `<div class="stack">${al('success','ok','Prova publicada.','Os alunos já podem fazer o simulado.')}${al('warning','warn','Faltam 8 questões.','A prova não pode ser publicada ainda.')}${al('destructive','err','Não foi possível salvar.','Verifique sua conexão e tente de novo.')}${al('info','info','Nova edição do ENEM disponível.','Importe quando quiser.')}</div>`)}
+    ${cell('Toast (top-right, z-toast, autoClose 5s)', `<div class="stack">${to('success','ok','Inscrição confirmada')}${to('destructive','err','Não foi possível enviar o arquivo','O tamanho máximo é 10 MB.')}${to('warning','warn','Sua sessão expira em 2 minutos')}${to('info','loader','Sincronizando questões…')}</div>`)}
+  </div>`);
+}
+
+function misc() {
+  return sec('misc','Card · Tabs · Pagination · Skeleton · Spinner','border, no shadow · rounded-lg', `<div class="grid">
+    ${cell('Card', `<div class="card"><div class="ch"><h3 class="text-h4">Simulados feitos</h3><p class="text-body-sm muted">Últimos 30 dias</p></div><div class="cc"><p class="text-numeric">1.284</p><p class="text-caption" style="color:var(--success)">▲ 12% no mês</p></div><div class="cf"><button class="btn sm b-ghost">Ver relatório</button></div></div>`)}
+    ${cell('Tabs', `<div><div class="tabs"><span class="tab on">Questões</span><span class="tab">Alunos</span><span class="tab">Configurações</span></div><p class="text-body muted" style="padding:12px 0">Conteúdo da aba Questões.</p></div>`)}
+    ${cell('Pagination', `<div class="pg"><button class="btn sm b-ghost" aria-label="Anterior">${I('left')}</button><button class="btn sm b-primary">1</button><button class="btn sm b-ghost">2</button><button class="btn sm b-ghost">3</button><span class="muted">…</span><button class="btn sm b-ghost">26</button><button class="btn sm b-ghost" aria-label="Próxima">${I('right')}</button></div>`)}
+    ${cell('Skeleton (pulses again after phase 0)', `<div class="card cc" style="display:grid;gap:8px"><div class="sk" style="height:18px;width:60%"></div><div class="sk" style="height:12px"></div><div class="sk" style="height:12px;width:80%"></div></div>`)}
+    ${cell('Spinner · inline / in button / page', `<div class="row" style="gap:16px"><span style="color:var(--muted-foreground)">${I('loader','spin')}</span><button class="btn b-primary" disabled style="opacity:.8">${I('loader','spin')}Salvando…</button><span style="color:var(--primary)"><svg class="ico spin" style="width:32px;height:32px" viewBox="0 0 24 24">${P.loader}</svg></span></div>`)}
+  </div>`);
+}
+
+function render() {
+  const v = VARIANTS[cur];
+  SECTIONS.length = 0;
+  const frame = document.getElementById('frame');
+  const ch = mode==='mobile' ? v.controlH.m : v.controlH.d;
+  frame.style.setProperty('--control-h', ch+'px');
+  frame.style.setProperty('--row-h', (mode==='mobile' && v.touch ? 44 : v.rowH)+'px');
+  frame.className = 'frame' + (mode==='mobile' ? ' mobile' : '') + (mode==='mobile' && v.mobileTable==='cards' ? ' cards-mode' : '') + (mode==='mobile' && v.touch ? ' touch' : '');
+  frame.innerHTML = buttons() + fields() + table(v) + overlays(v) + menus() + feedback() + misc();
+  document.getElementById('vtitle').textContent = `Variant ${cur} — ${v.name}`;
+  document.getElementById('vdesc').innerHTML = '<ul>'+v.desc.map(d=>`<li>${d}</li>`).join('')+'</ul>';
+  document.getElementById('toc').innerHTML = SECTIONS.map(([id,t])=>`<a href="#${id}">${t}</a>`).join('');
+  document.getElementById('label').textContent = `${cur} — ${v.name}`;
+  document.querySelectorAll('.w').forEach(b=>b.classList.toggle('on', b.dataset.w===mode));
+  document.getElementById('state').textContent = JSON.stringify({ variant: cur, name: v.name, mode, controlHeight: ch, tableRowHeight: parseInt(frame.style.getPropertyValue('--row-h')), mobileTable: v.mobileTable, mobileDialog: v.mobileDialog, touchTargets44: !!v.touch }, null, 2);
+}
+function setParam(k,val){ const u=new URL(location); u.searchParams.set(k,val); history.replaceState(null,'',u); }
+function go(d){ const ks=Object.keys(VARIANTS); cur=ks[(ks.indexOf(cur)+d+ks.length)%ks.length]; setParam('variant',cur); render(); }
+document.getElementById('prev').onclick=()=>go(-1);
+document.getElementById('next').onclick=()=>go(1);
+document.querySelectorAll('.w').forEach(b=>b.onclick=()=>{ mode=b.dataset.w; setParam('w',mode); render(); });
+addEventListener('keydown',e=>{ if(e.target.closest('input,textarea,[contenteditable]'))return; if(e.key==='ArrowLeft')go(-1); if(e.key==='ArrowRight')go(1); });
+render();
+</script>
+</body>
+</html>

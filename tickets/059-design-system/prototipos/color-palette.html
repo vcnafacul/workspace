@@ -1,0 +1,487 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway. Wayfinder ticket: "Color palette" (343-design-system/tickets/05-color-palette.md)
+  Question: what is the consolidated palette (primitive scales + every semantic token value)?
+  Three palette proposals, switchable via ?variant=A|B|C (bottom bar or ← →):
+    A — Brand-led: status colors derived from brand hues, marine-tinted neutrals
+    B — Conventional: textbook status hues (green / amber / blue / red), pure-gray neutrals
+    C — Restrained: few hues, status carried by dots and icons, not colored fills
+  Each variant renders the SAME sample screens through semantic CSS variables only, then lists its
+  semantic tokens (with live WCAG 2.x contrast), its primitive scales, and where each legacy color lands.
+  Scales are generated in OKLCH from the exact brand hex, which sits on its step unchanged.
+  CTA = white on orange-700 (#B35300, pinned on the orange scale), decided in the ticket (overrides dashV2's marine-on-orange).
+  Structure follows "How tokens are structured": two layers, shadcn vocabulary + page/cta/success/warning/info.
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PROTOTYPE — Color palette (#343)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Raleway, sans-serif; background: #e9e9ec; color: #111; }
+  .chrome { font-family: ui-sans-serif, system-ui, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 24px 16px 120px; }
+  h1.chrome { font-size: 18px; margin: 0 0 4px; }
+  .lede { font-size: 13px; color: #444; margin: 0 0 16px; max-width: 900px; }
+  .lede li { margin: 2px 0; }
+  .sec-title { font: 600 12px ui-sans-serif, system-ui; text-transform: uppercase; letter-spacing: .08em; color: #555; margin: 28px 0 8px; }
+
+  /* ---------- the app, painted ONLY with semantic vars ---------- */
+  .app { background: var(--page); color: var(--foreground); border-radius: 10px; padding: 20px; border: 1px solid #ccc; }
+  .grid2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  @media (max-width: 900px) { .grid2, .grid3 { grid-template-columns: 1fr; } }
+  .card { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 8px; }
+  .pad { padding: 16px; }
+  .muted { color: var(--muted-foreground); }
+  .small { font-size: 13px; }
+  .xs { font-size: 12px; }
+  h2 { font-size: 20px; margin: 0; font-weight: 700; }
+  h3 { font-size: 15px; margin: 0 0 8px; font-weight: 700; }
+
+  .btn { font: 600 14px Raleway, sans-serif; border-radius: 6px; padding: 8px 14px; border: 1px solid transparent; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+  .btn-cta { background: var(--cta); color: var(--cta-foreground); }
+  .btn-primary { background: var(--primary); color: var(--primary-foreground); }
+  .btn-secondary { background: var(--secondary); color: var(--secondary-foreground); }
+  .btn-outline { background: var(--background); color: var(--foreground); border-color: var(--border); }
+  .btn-ghost { background: transparent; color: var(--foreground); }
+  .btn-destructive { background: var(--destructive); color: var(--destructive-foreground); }
+  .btn[disabled] { opacity: .45; cursor: not-allowed; }
+  .btn:focus-visible, .focus { outline: none; box-shadow: 0 0 0 1px var(--background), 0 0 0 3px var(--ring); }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  .input { font: 14px Raleway, sans-serif; width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid var(--input); background: var(--background); color: var(--foreground); }
+  .input.invalid { border-color: var(--destructive); }
+  .input::placeholder { color: var(--muted-foreground); }
+  label { font-size: 13px; font-weight: 600; display: block; margin: 10px 0 4px; }
+  .hint { font-size: 12px; color: var(--muted-foreground); margin-top: 4px; }
+  .check { width: 16px; height: 16px; border-radius: 4px; border: 1px solid var(--primary); display: inline-grid; place-items: center; font-size: 11px; vertical-align: middle; }
+  .check.on { background: var(--primary); color: var(--primary-foreground); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted-foreground); padding: 0 12px; height: 36px; border-bottom: 1px solid var(--border); }
+  td { padding: 0 12px; height: 40px; border-bottom: 1px solid var(--border); }
+  tr.hover td { background: var(--accent); color: var(--accent-foreground); }
+
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px; }
+  .dot { width: 7px; height: 7px; border-radius: 999px; display: inline-block; }
+  .badge-default { background: var(--primary); color: var(--primary-foreground); }
+
+  .menu { position: absolute; right: 8px; top: 30px; background: var(--popover); color: var(--popover-foreground); border: 1px solid var(--border); border-radius: 8px; padding: 4px; width: 190px; box-shadow: 0 6px 20px rgba(0,0,0,.12); z-index: 2; }
+  .menu div { padding: 7px 10px; border-radius: 5px; font-size: 14px; }
+  .menu .hl { background: var(--accent); color: var(--accent-foreground); }
+  .menu .danger { color: var(--destructive); }
+  .menu hr { border: 0; border-top: 1px solid var(--border); margin: 4px 0; }
+
+  .alert { border-radius: 8px; padding: 10px 12px; font-size: 13px; display: flex; gap: 10px; align-items: flex-start; }
+  .toast { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; font-size: 13px; display: flex; gap: 10px; align-items: center; box-shadow: 0 4px 14px rgba(0,0,0,.08); }
+  .toast.solid { border: 0; }
+  .ico { width: 18px; height: 18px; border-radius: 999px; display: inline-grid; place-items: center; font-size: 11px; font-weight: 700; flex: none; }
+
+  .kpi .num { font-size: 28px; font-weight: 700; }
+  .bar { height: 8px; border-radius: 999px; background: var(--muted); overflow: hidden; }
+  .bar > span { display: block; height: 100%; }
+  .tooltip { display: inline-block; background: var(--primary); color: var(--primary-foreground); font-size: 12px; padding: 4px 8px; border-radius: 5px; }
+  .skeleton { height: 12px; border-radius: 4px; background: color-mix(in srgb, var(--primary) 10%, transparent); margin: 6px 0; }
+
+  /* home sections: [data-theme] re-points the SAME semantic vars */
+  .home { border-radius: 10px; padding: 28px; background: var(--background); color: var(--foreground); }
+  .home h2 { font-size: 26px; }
+  .home .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--accent-foreground); }
+
+  /* ---------- chrome tables ---------- */
+  .ct { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: #fff; border-radius: 8px; border: 1px solid #ccc; width: 100%; border-collapse: collapse; }
+  .ct th { font: 600 11px ui-sans-serif, system-ui; color: #555; height: 30px; border-bottom: 1px solid #ddd; padding: 0 8px; }
+  .ct td { height: 28px; border-bottom: 1px solid #eee; padding: 0 8px; }
+  .sw { width: 22px; height: 18px; border-radius: 4px; border: 1px solid rgba(0,0,0,.12); display: inline-block; vertical-align: middle; }
+  .pass { color: #0a7a2f; font-weight: 700; } .fail { color: #c00; font-weight: 700; }
+  .scales { display: grid; gap: 6px; }
+  .scale { display: grid; grid-template-columns: 90px repeat(11, 1fr); gap: 3px; align-items: stretch; font: 10px ui-monospace, monospace; }
+  .scale .nm { font: 600 12px ui-sans-serif, system-ui; align-self: center; }
+  .chip { border-radius: 5px; padding: 18px 3px 3px; min-height: 52px; position: relative; }
+  .chip.anchor { outline: 2px solid #000; outline-offset: 1px; }
+  .chip .st { position: absolute; top: 3px; left: 4px; font-weight: 700; }
+
+  /* switcher */
+  .switch { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; align-items: center; background: #000; color: #fff; border-radius: 999px; padding: 8px 14px; font: 13px ui-sans-serif, system-ui; box-shadow: 0 8px 24px rgba(0,0,0,.35); z-index: 50; }
+  .switch button { background: none; border: 0; color: #fff; font-size: 14px; cursor: pointer; padding: 0 6px; }
+  .switch #label { min-width: 280px; text-align: center; }
+  pre.state { font: 11px ui-monospace, monospace; background: #fff; border: 1px dashed #aaa; border-radius: 8px; padding: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="chrome" id="vtitle"></h1>
+  <div class="lede chrome" id="vdesc"></div>
+
+  <div class="sec-title">1 · Sample screens (painted only with semantic tokens)</div>
+  <div class="app" id="app"></div>
+
+  <div class="sec-title">2 · Home sections — [data-theme] re-points the same tokens</div>
+  <div class="grid2" id="homes"></div>
+
+  <div class="sec-title">3 · Semantic tokens and contrast (WCAG 2.x · text ≥ 4.5 · UI/large ≥ 3)</div>
+  <table class="ct" id="tokens"></table>
+
+  <div class="sec-title">4 · Primitive scales (outlined chip = exact brand hex, unchanged)</div>
+  <div class="scales" id="scales"></div>
+
+  <div class="sec-title">5 · Where each legacy color lands (nearest primitive, ΔE in OKLab)</div>
+  <table class="ct" id="legacy"></table>
+
+  <div class="sec-title">State</div>
+  <pre class="state" id="state"></pre>
+</div>
+
+<div class="switch">
+  <button id="prev" aria-label="previous">◀</button>
+  <span id="label"></span>
+  <button id="next" aria-label="next">▶</button>
+</div>
+
+<script>
+/* ================= color math (OKLCH ↔ sRGB, WCAG) ================= */
+const hex2rgb = h => { h = h.replace('#',''); if (h.length===3) h=[...h].map(c=>c+c).join(''); return [0,2,4].map(i=>parseInt(h.slice(i,i+2),16)/255); };
+const rgb2hex = c => '#'+c.map(v=>Math.round(Math.min(1,Math.max(0,v))*255).toString(16).padStart(2,'0')).join('').toUpperCase();
+const toLin = v => v<=0.04045 ? v/12.92 : Math.pow((v+0.055)/1.055,2.4);
+const fromLin = v => v<=0.0031308 ? 12.92*v : 1.055*Math.pow(v,1/2.4)-0.055;
+function rgb2oklab([r,g,b]) {
+  r=toLin(r); g=toLin(g); b=toLin(b);
+  const l=Math.cbrt(0.4122214708*r+0.5363325363*g+0.0514459929*b);
+  const m=Math.cbrt(0.2119034982*r+0.6806995451*g+0.1073969566*b);
+  const s=Math.cbrt(0.0883024619*r+0.2817188376*g+0.6299787005*b);
+  return [0.2104542553*l+0.7936177850*m-0.0040720468*s, 1.9779984951*l-2.4285922050*m+0.4505937099*s, 0.0259040371*l+0.7827717662*m-0.8086757660*s];
+}
+function oklab2rgbLin([L,a,b]) {
+  const l=(L+0.3963377774*a+0.2158037573*b)**3, m=(L-0.1055613458*a-0.0638541728*b)**3, s=(L-0.0894841775*a-1.2914855480*b)**3;
+  return [4.0767416621*l-3.3077115913*m+0.2309699292*s, -1.2684380046*l+2.6097574011*m-0.3413193965*s, -0.0041960863*l-0.7034186147*m+1.7076147010*s];
+}
+const hex2oklch = h => { const [L,a,b]=rgb2oklab(hex2rgb(h)); return [L, Math.hypot(a,b), (Math.atan2(b,a)*180/Math.PI+360)%360]; };
+function oklch2hex(L,C,H) {
+  // reduce chroma until in sRGB gamut
+  let lo=0, hi=C, best=[L,0,H];
+  const inG = c => { const r=oklab2rgbLin([L,c*Math.cos(H*Math.PI/180),c*Math.sin(H*Math.PI/180)]); return r.every(v=>v>=-1e-4&&v<=1+1e-4); };
+  if (inG(C)) best=[L,C,H]; else { for (let i=0;i<24;i++){ const mid=(lo+hi)/2; if(inG(mid)) lo=mid; else hi=mid; } best=[L,lo,H]; }
+  const [l,c,h]=best; const lin=oklab2rgbLin([l,c*Math.cos(h*Math.PI/180),c*Math.sin(h*Math.PI/180)]);
+  return rgb2hex(lin.map(v=>fromLin(Math.min(1,Math.max(0,v)))));
+}
+const lum = h => { const [r,g,b]=hex2rgb(h).map(toLin); return 0.2126*r+0.7152*g+0.0722*b; };
+const contrast = (a,b) => { const [x,y]=[lum(a),lum(b)].sort((p,q)=>q-p); return (x+0.05)/(y+0.05); };
+function hslChannels(h) {
+  const [r,g,b]=hex2rgb(h); const mx=Math.max(r,g,b), mn=Math.min(r,g,b); let H=0,S=0; const L=(mx+mn)/2;
+  if (mx!==mn){ const d=mx-mn; S=L>0.5?d/(2-mx-mn):d/(mx+mn);
+    H = mx===r ? (g-b)/d+(g<b?6:0) : mx===g ? (b-r)/d+2 : (r-g)/d+4; H*=60; }
+  return `${Math.round(H)} ${Math.round(S*100)}% ${Math.round(L*100)}%`;
+}
+const deltaE = (a,b) => { const p=rgb2oklab(hex2rgb(a)), q=rgb2oklab(hex2rgb(b)); return Math.hypot(p[0]-q[0],p[1]-q[1],p[2]-q[2])*100; };
+
+/* ================= scale generator ================= */
+const STEPS=[50,100,200,300,400,500,600,700,800,900,950];
+// Target OKLCH lightness per step, tuned so a neutral 400 is ~3:1 on white (input borders), 500 ~4.6:1, 600 ~6.8:1. The anchor's own L replaces its step's target,
+// and each side of the curve is rescaled between the end (50/950) and the anchor, so the brand hex sits unchanged on its step.
+const L_TARGET={50:0.985,100:0.955,200:0.905,300:0.80,400:0.66,500:0.56,600:0.47,700:0.39,800:0.31,900:0.235,950:0.17};
+// spec: { hex, step } anchors an exact brand hex on a step; or { L, C, H, step } for synthetic neutrals.
+// opts: darkHue (hue at 950, for yellows drifting to amber), lightChroma (fraction of C kept at 50), pin {step: hex}
+function scale(spec) {
+  let [aL,aC,aH] = spec.hex ? hex2oklch(spec.hex) : [spec.L,spec.C,spec.H];
+  const ai = STEPS.indexOf(spec.step), last=STEPS.length-1;
+  const lightC = spec.lightChroma ?? 0.18;
+  const tA = L_TARGET[spec.step], t50 = L_TARGET[50], t950 = L_TARGET[950];
+  const out = {};
+  STEPS.forEach((st,i) => {
+    if (i===ai && spec.hex) { out[st]=spec.hex.toUpperCase(); return; }
+    if (spec.pin && spec.pin[st]) { out[st]=spec.pin[st].toUpperCase(); return; }
+    // the target curve's shape, rescaled so the anchor lands exactly on its step (monotonic by construction)
+    let L = i<ai ? t50 + (aL-t50)*(L_TARGET[st]-t50)/(tA-t50)
+          : i>ai ? aL + (Math.min(t950, aL-0.06)-aL)*(L_TARGET[st]-tA)/(t950-tA) : aL, C, H=aH;
+    if (i<ai) { const t=(ai-i)/ai; C=aC*(1-(1-lightC)*Math.pow(t,1.2)); }
+    else if (i>ai) { const t=(i-ai)/(last-ai); C=aC*(1-0.45*t); if (spec.darkHue!=null) H=aH+(spec.darkHue-aH)*t; }
+    else { C=aC; }
+    out[st]=oklch2hex(L,C,H);
+  });
+  return out;
+}
+const MARINE_H = hex2oklch('#0B2747')[2];
+
+/* ================= variants ================= */
+const BRAND = {
+  marine: { hex:'#0B2747', step:900 },
+  orange: { hex:'#FF7600', step:500, pin:{ 700:'#B35300' } }, // 700 pinned: the CTA fill (white text, 5.06:1)
+  pink:   { hex:'#DA005A', step:600 },
+  mint:   { hex:'#37D6B5', step:400 },
+  yellow: { hex:'#FFE53C', step:300, darkHue:70 },
+  red:    { hex:'#F43535', step:500 },
+};
+const VARIANTS = {
+  A: {
+    name: 'Brand-led',
+    desc: [
+      'Every status hue comes from a brand color: <b>success = mint</b> (the brand "green" #37D6B5, deepened), <b>warning = yellow</b> drifting to mustard, <b>info = blueGeo</b> (#4D8CCB, already the dashV2 info), <b>error = brand red</b>.',
+      'Neutrals are <b>tinted toward marine</b> (cool, slightly blue grays) so surfaces feel part of the brand.',
+      'Status: <b>dots in tables/lists</b>, <b>tinted</b> alerts and standalone badges. Chart series all ≥ 3:1 on white.',
+      'Retired outright: <code>green2/darkGreen/green3</code> (forest green) — no green other than mint remains.',
+    ],
+    scales: { ...BRAND, blue:{ hex:'#4D8CCB', step:500 }, neutral:{ L:0.56, C:0.018, H:MARINE_H, step:500, lightChroma:0.5 } },
+    sem: {
+      page:'neutral-50', muted:'neutral-100', 'muted-foreground':'neutral-600', secondary:'neutral-100', accent:'marine-100', border:'neutral-200', input:'neutral-400', ring:'orange-600',
+      destructive:'red-600', 'destructive-muted':'red-50',
+      success:'mint-700', 'success-muted':'mint-50',
+      warning:'yellow-600', 'warning-muted':'yellow-100',
+      info:'blue-600', 'info-muted':'blue-50',
+      chart:['marine-700','orange-600','mint-600','pink-600','yellow-500','blue-500'], // all ≥ 3:1 on white
+    },
+    statusStyle: 'tint', tableStatus: 'dot', // decided: dots in tables/lists, tint in alerts
+  },
+  B: {
+    name: 'Conventional',
+    desc: [
+      'Status hues are the ones users already read without thinking: <b>success = green</b> (anchored on the existing <code>green2</code> #0F9B2C), <b>warning = amber</b>, <b>info = blue</b>, <b>error = brand red</b>.',
+      'Neutrals are <b>pure gray</b>, anchored on the existing <code>grey</code> #707070 — closest to today\'s <code>gray-*</code> (1,086 uses), so the dash migrates with the least visual change.',
+      'Brand hues (orange, pink, mint, yellow) stay for CTA, charts and the home; they don\'t carry status.',
+      'Adds two hues the brand never had (amber, blue) — blue already appears 170× unofficially.',
+    ],
+    scales: { ...BRAND, green:{ hex:'#0F9B2C', step:600 }, amber:{ hex:'#F59E0B', step:500, darkHue:50 }, blue:{ hex:'#2563EB', step:600 }, neutral:{ hex:'#707070', step:500 } },
+    sem: {
+      page:'neutral-50', muted:'neutral-100', 'muted-foreground':'neutral-600', secondary:'neutral-100', accent:'neutral-100', border:'neutral-200', input:'neutral-400', ring:'marine-500',
+      destructive:'red-600', 'destructive-muted':'red-50',
+      success:'green-700', 'success-muted':'green-50',
+      warning:'amber-700', 'warning-muted':'amber-50',
+      info:'blue-600', 'info-muted':'blue-50',
+      chart:['blue-600','orange-500','green-600','pink-600','amber-400','marine-700'],
+    },
+    statusStyle: 'tint',
+  },
+  C: {
+    name: 'Restrained',
+    desc: [
+      'The UI is almost two-color: <b>marine + neutrals</b>, with <b>orange reserved for the CTA</b>. Status never fills a surface — it shows as a <b>colored dot or icon next to neutral text</b>, so a busy table doesn\'t turn into a rainbow.',
+      'Only four hues carry meaning: mint (success), orange-800 (warning — shares the CTA hue on purpose, one step darker), red (error), marine-600 (info). No blue, no amber, no forest green.',
+      'Charts are a marine ramp with orange as the highlight series.',
+      'Neutrals tinted toward marine, like A.',
+    ],
+    scales: { ...BRAND, neutral:{ L:0.56, C:0.014, H:MARINE_H, step:500, lightChroma:0.5 } },
+    sem: {
+      page:'neutral-50', muted:'neutral-100', 'muted-foreground':'neutral-600', secondary:'neutral-100', accent:'marine-50', border:'neutral-200', input:'neutral-400', ring:'orange-600',
+      destructive:'red-600', 'destructive-muted':'neutral-50',
+      success:'mint-700', 'success-muted':'neutral-50',
+      warning:'orange-800', 'warning-muted':'neutral-50',
+      info:'marine-600', 'info-muted':'neutral-50',
+      chart:['marine-900','marine-600','marine-400','marine-200','orange-500','mint-500'],
+    },
+    statusStyle: 'dot',
+  },
+};
+// tokens identical in every variant (decided in "How tokens are structured")
+const FIXED = {
+  background:'white', foreground:'marine-900', card:'white', 'card-foreground':'marine-900', popover:'white', 'popover-foreground':'marine-900',
+  primary:'marine-900', 'primary-foreground':'white', 'secondary-foreground':'marine-900', 'accent-foreground':'marine-900',
+  cta:'orange-700', 'cta-foreground':'white', // decided in this ticket (Q1a): white on darker orange
+  'destructive-foreground':'white', 'success-foreground':'white', 'warning-foreground':'white', 'info-foreground':'white',
+};
+const HOME_THEMES = {
+  marine: { background:'marine-900', foreground:'white', 'muted-foreground':'marine-200', card:'marine-800', 'card-foreground':'white', border:'marine-700', primary:'white', 'primary-foreground':'marine-900', 'accent-foreground':'mint-400', secondary:'marine-800', 'secondary-foreground':'white' },
+  pink:   { background:'pink-50', 'accent-foreground':'pink-600', border:'pink-100' },
+  green:  { background:'mint-50', 'accent-foreground':'mint-700', border:'mint-100' },
+};
+
+/* ================= build ================= */
+let cur = new URLSearchParams(location.search).get('variant') || 'A';
+if (!VARIANTS[cur]) cur='A';
+
+function build(key) {
+  const v = VARIANTS[key];
+  const prim = {}; for (const [hue,spec] of Object.entries(v.scales)) prim[hue]=scale(spec);
+  const res = ref => ref==='white' ? '#FFFFFF' : (() => { const [h,s]=ref.split('-'); return prim[h][s]; })();
+  const semRefs = { ...FIXED, ...Object.fromEntries(Object.entries(v.sem).filter(([k])=>k!=='chart')) };
+  v.sem.chart.forEach((r,i)=> semRefs['chart-'+(i+1)]=r);
+  const sem = Object.fromEntries(Object.entries(semRefs).map(([k,r])=>[k,res(r)]));
+  return { v, prim, res, semRefs, sem };
+}
+const cssVars = (obj) => Object.entries(obj).map(([k,h])=>`--${k}:${h}`).join(';');
+
+const STATUS = [
+  ['success','Concluída','✓'], ['warning','Em andamento','!'], ['destructive','Faltando questões','×'], ['info','Agendada','i'],
+];
+function badge(kind, text, style) {
+  if (kind==='neutral') return `<span class="badge" style="background:var(--muted);color:var(--muted-foreground)"><span class="dot" style="background:var(--muted-foreground)"></span>${text}</span>`;
+  if (style==='dot') return `<span class="badge" style="background:var(--muted);color:var(--foreground)"><span class="dot" style="background:var(--${kind})"></span>${text}</span>`;
+  return `<span class="badge" style="background:var(--${kind}-muted);color:var(--${kind})"><span class="dot" style="background:var(--${kind})"></span>${text}</span>`;
+}
+function alertBox(kind, title, text, style) {
+  const ico = {success:'✓',warning:'!',destructive:'×',info:'i'}[kind];
+  if (style==='dot') return `<div class="alert" style="background:var(--card);border:1px solid var(--border);border-left:3px solid var(--${kind})"><span class="ico" style="background:var(--${kind});color:var(--${kind}-foreground)">${ico}</span><div><b>${title}</b> <span class="muted">${text}</span></div></div>`;
+  return `<div class="alert" style="background:var(--${kind}-muted);color:var(--foreground)"><span class="ico" style="background:var(--${kind});color:var(--${kind}-foreground)">${ico}</span><div><b style="color:var(--${kind})">${title}</b> ${text}</div></div>`;
+}
+function toast(kind, text) {
+  const ico = {success:'✓',warning:'!',destructive:'×',info:'i'}[kind];
+  return `<div class="toast"><span class="ico" style="background:var(--${kind});color:var(--${kind}-foreground)">${ico}</span>${text}</div>`;
+}
+
+function renderApp(B) {
+  const st = B.v.statusStyle;
+  const rows = [
+    ['ENEM 2019 — 1ª aplicação','180/180','success','Concluída'],
+    ['ENEM 2019 — reaplicação','172/180','destructive','Faltando questões'],
+    ['FUVEST 2024','90/90','warning','Em andamento'],
+    ['Simulado Nacional 3','0/45','info','Agendada'],
+    ['UNICAMP 2023','—','neutral','Rascunho'],
+  ];
+  const chart = [62,48,35,27,20,12];
+  return `
+  <div class="grid2">
+    <div class="card">
+      <div class="pad row" style="justify-content:space-between;border-bottom:1px solid var(--border)">
+        <div><h2>Banco de provas</h2><div class="small muted">5 provas · ordenado por ano</div></div>
+        <div class="row">
+          <input class="input" style="width:180px" placeholder="Buscar prova…" />
+          <button class="btn btn-outline">Filtros</button>
+          <button class="btn btn-cta">+ Nova prova</button>
+        </div>
+      </div>
+      <div style="position:relative">
+        <table>
+          <thead><tr><th>Prova</th><th>Questões</th><th>Status</th><th></th></tr></thead>
+          <tbody>
+            ${rows.map((r,i)=>`<tr class="${i===1?'hover':''}"><td>${r[0]}</td><td class="muted">${r[1]}</td><td>${badge(r[2],r[3],B.v.tableStatus||st)}</td><td style="text-align:right">⋯</td></tr>`).join('')}
+          </tbody>
+        </table>
+        <div class="menu" style="top:110px">
+          <div class="hl">Editar</div><div>Duplicar</div><div>Ver questões</div><hr/><div class="danger">Excluir prova</div>
+        </div>
+      </div>
+      <div class="pad row small muted" style="justify-content:space-between">Mostrando 1–5 de 5 <span class="row"><button class="btn btn-ghost">‹</button><button class="btn btn-primary" style="padding:4px 10px">1</button><button class="btn btn-ghost">›</button></span></div>
+    </div>
+
+    <div style="display:grid;gap:16px;align-content:start">
+      <div class="card pad">
+        <h3>Nova prova</h3>
+        <label>Nome</label><input class="input focus" value="ENEM 2025" />
+        <label>Ano</label><input class="input invalid" value="20255" />
+        <div class="hint" style="color:var(--muted-foreground)"><span style="color:var(--destructive)">●</span> Ano deve ter 4 dígitos.</div>
+        <label>Opções</label>
+        <div class="small"><span class="check on">✓</span> Prova oficial &nbsp; <span class="check"></span> Reaplicação</div>
+        <div class="row" style="margin-top:14px;justify-content:flex-end"><button class="btn btn-ghost">Cancelar</button><button class="btn btn-primary">Salvar</button></div>
+      </div>
+      <div class="card pad">
+        <h3>Botões</h3>
+        <div class="row"><button class="btn btn-cta">CTA</button><button class="btn btn-primary">Primary</button><button class="btn btn-secondary">Secondary</button></div>
+        <div class="row" style="margin-top:8px"><button class="btn btn-outline">Outline</button><button class="btn btn-ghost">Ghost</button><button class="btn btn-destructive">Excluir</button><button class="btn btn-primary" disabled>Disabled</button></div>
+        <div class="row" style="margin-top:10px"><span class="tooltip">Tooltip</span><span class="badge badge-default">Badge</span><span style="color:var(--primary);text-decoration:underline;font-size:14px">link</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:16px">
+    <div style="display:grid;gap:8px;align-content:start">
+      ${alertBox('success','Prova publicada.','Os alunos já podem fazer.',st)}
+      ${alertBox('warning','Faltam 8 questões.','A prova não pode ser publicada ainda.',st)}
+      ${alertBox('destructive','Falha ao salvar.','Verifique sua conexão.',st)}
+      ${alertBox('info','Nova versão do ENEM disponível.','Importe quando quiser.',st)}
+    </div>
+    <div style="display:grid;gap:8px;align-content:start">
+      ${toast('success','Inscrição confirmada')}
+      ${toast('destructive','Não foi possível enviar o arquivo')}
+      ${toast('warning','Sessão expira em 2 minutos')}
+      ${toast('info','Sincronizando questões…')}
+      <div class="card pad"><div class="skeleton" style="width:70%"></div><div class="skeleton"></div><div class="skeleton" style="width:40%"></div></div>
+    </div>
+    <div style="display:grid;gap:12px;align-content:start">
+      <div class="card pad kpi">
+        <div class="small muted">Simulados feitos</div>
+        <div class="num">24 <span class="small" style="color:var(--success);font-weight:700">▲ 12%</span></div>
+        <div class="bar" style="margin-top:8px"><span style="width:68%;background:var(--success)"></span></div>
+        <div class="xs muted" style="margin-top:4px">68% da meta do semestre</div>
+      </div>
+      <div class="card pad kpi">
+        <div class="small muted">Média em Matemática</div>
+        <div class="num">612 <span class="small" style="color:var(--destructive);font-weight:700">▼ 3%</span></div>
+      </div>
+      <div class="card pad">
+        <div class="small muted" style="margin-bottom:8px">Inscrições por cursinho</div>
+        <svg viewBox="0 0 240 100" width="100%" height="100">
+          ${chart.map((h,i)=>`<rect x="${i*40+6}" y="${100-h*1.4}" width="28" height="${h*1.4}" rx="3" fill="var(--chart-${i+1})"/>`).join('')}
+        </svg>
+        <div class="row xs">${chart.map((_,i)=>`<span class="row" style="gap:4px"><span class="dot" style="background:var(--chart-${i+1})"></span>série ${i+1}</span>`).join('')}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderHome(theme, B) {
+  const ov = Object.fromEntries(Object.entries(HOME_THEMES[theme]).map(([k,r])=>[k,B.res(r)]));
+  const copy = {
+    marine: ['Quem somos','Educação popular, digital e gratuita','Mais de 300 cursinhos populares usam a plataforma para gerir turmas, simulados e inscrições.'],
+    pink:   ['Para estudantes','Estude no seu ritmo','Simulados no formato ENEM, correção de redação e materiais organizados por frente.'],
+  }[theme];
+  return `<div class="home" data-theme="${theme}" style="${cssVars(ov)}">
+    <div class="eyebrow">${copy[0]}</div>
+    <h2 style="margin:6px 0 8px">${copy[1]}</h2>
+    <p class="muted" style="margin:0 0 16px;max-width:460px">${copy[2]}</p>
+    <div class="row"><button class="btn btn-cta">Quero participar</button><button class="btn btn-primary">Saiba mais</button><button class="btn btn-outline" style="background:transparent">Ver mapa</button></div>
+    <div class="card pad" style="margin-top:16px;max-width:320px"><b>Cursinho Popular X</b><div class="small muted">São Paulo · 4 turmas</div></div>
+    <div class="xs" style="margin-top:12px;opacity:.75">overrides: ${Object.keys(HOME_THEMES[theme]).join(', ')}</div>
+  </div>`;
+}
+
+const PAIRS = [ // [fg, bg, kind]
+  ['foreground','background','text'], ['foreground','page','text'], ['muted-foreground','background','text'], ['muted-foreground','page','text'], ['muted-foreground','muted','text'],
+  ['primary-foreground','primary','text'], ['cta-foreground','cta','text'], ['secondary-foreground','secondary','text'], ['accent-foreground','accent','text'],
+  ['destructive','background','text'], ['destructive-foreground','destructive','text'], ['destructive','destructive-muted','text'],
+  ['success','background','text'], ['success-foreground','success','text'], ['success','success-muted','text'],
+  ['warning','background','text'], ['warning-foreground','warning','text'], ['warning','warning-muted','text'],
+  ['info','background','text'], ['info-foreground','info','text'], ['info','info-muted','text'],
+  ['border','background','ui (decorative)'], ['input','background','ui'], ['ring','background','ui'], ['cta','background','fill (label identifies it)'],
+];
+
+function render() {
+  const B = build(cur);
+  document.documentElement.setAttribute('style', cssVars(B.sem));
+  document.getElementById('vtitle').textContent = `Variant ${cur} — ${B.v.name}`;
+  document.getElementById('vdesc').innerHTML = '<ul>'+B.v.desc.map(d=>`<li>${d}</li>`).join('')+'</ul>';
+  document.getElementById('label').textContent = `${cur} — ${B.v.name}`;
+  document.getElementById('app').innerHTML = renderApp(B);
+  document.getElementById('homes').innerHTML = renderHome('marine',B)+renderHome('pink',B);
+
+  // tokens table
+  const tokRows = Object.entries(B.semRefs).map(([k,r])=>`<tr><td><span class="sw" style="background:${B.sem[k]}"></span></td><td>--${k}</td><td>${r}</td><td>${B.sem[k]}</td><td>${hslChannels(B.sem[k])}</td></tr>`).join('');
+  const pairRows = PAIRS.map(([f,b,kind])=>{ const c=contrast(B.sem[f],B.sem[b]); const need = kind==='text'?4.5:kind==='ui'?3:0; const ok = need===0 || c>=need;
+    return `<tr><td><span class="sw" style="background:${B.sem[b]};color:${B.sem[f]};width:44px;text-align:center;font:700 11px Raleway">Aa</span></td><td>${f} on ${b}</td><td>${kind}</td><td class="${ok?'pass':'fail'}">${c.toFixed(2)}:1 ${need? (ok?'✓':'✗ <'+need):''}</td><td></td></tr>`; }).join('');
+  document.getElementById('tokens').innerHTML = `<tr><th></th><th>token</th><th>→ primitive</th><th>hex</th><th>HSL channels</th></tr>${tokRows}
+    <tr><th></th><th>pair</th><th>kind</th><th>contrast</th><th></th></tr>${pairRows}`;
+
+  // scales
+  document.getElementById('scales').innerHTML = Object.entries(B.prim).map(([hue,sc])=>{
+    const spec=B.v.scales[hue];
+    return `<div class="scale"><div class="nm">${hue}${spec.hex?`<div style="font:10px ui-monospace;color:#666">${spec.hex}@${spec.step}</div>`:''}</div>${STEPS.map(s=>{const h=sc[s]; const fg=contrast(h,'#FFFFFF')>=contrast(h,'#000000')?'#fff':'#000'; const w=contrast(h,'#FFFFFF');
+      return `<div class="chip ${(spec.hex&&s===spec.step)||(spec.pin&&spec.pin[s])?'anchor':''}" style="background:${h};color:${fg}" title="${hue}-${s} ${h} · ${w.toFixed(2)}:1 on white"><span class="st">${s}</span>${h.slice(1)}<br>${w.toFixed(1)}</div>`;}).join('')}</div>`;
+  }).join('') + `<div class="xs chrome" style="color:#555">Second number in each chip = contrast against white.</div>`;
+
+  // legacy mapping
+  const LEGACY = [
+    ['marine','#0B2747','foreground / primary'], ['backgroundMarine','#001228','home marine bg (expressive)'], ['orange','#FF7600','cta'], ['darkOrange','#FC8621','—'],
+    ['pink','#DA005A','expressive / chart'], ['green','#37D6B5','expressive / chart'], ['lightGreen','#8CC408','—'], ['green2','#0F9B2C','success'], ['darkGreen','#0F9B2C','success'], ['green3','#19982B','success'],
+    ['yellow','#FFE53C','expressive / chart'], ['lightYellow','#FFF4AF','warning-muted?'], ['red','#F43535','destructive'], ['redError','#FF0000','destructive'],
+    ['grey','#707070','muted-foreground'], ['darkGrey','#545454','muted-foreground'], ['gray2','#A6A6A6','—'], ['lightGray','#E0E0E0','border'], ['backgroundGrey','#F8F8F8','page'],
+    ['blueGeo','#4D8CCB','info'], ['purple','#8A2BE2','—'], ['#b35300 (arbitrary)','#B35300','warning text'], ['#0d7a63 (arbitrary)','#0D7A63','success text'], ['gray-500','#6B7280','muted-foreground'], ['gray-200','#E5E7EB','border'],
+  ];
+  const all = Object.entries(B.prim).flatMap(([hue,sc])=>STEPS.map(s=>[`${hue}-${s}`,sc[s]]));
+  document.getElementById('legacy').innerHTML = `<tr><th></th><th>legacy</th><th>hex</th><th>nearest primitive</th><th>ΔE</th><th>suggested semantic</th></tr>` +
+    LEGACY.map(([n,h,s])=>{ let best=null; for (const [nm,ph] of all){ const d=deltaE(h,ph); if(!best||d<best[2]) best=[nm,ph,d]; }
+      return `<tr><td><span class="sw" style="background:${h}"></span> <span class="sw" style="background:${best[1]}"></span></td><td>${n}</td><td>${h}</td><td>${best[0]} ${best[1]}</td><td style="color:${best[2]>6?'#c00':best[2]>3?'#a60':'#0a7a2f'}">${best[2].toFixed(1)}</td><td>${s}</td></tr>`; }).join('');
+
+  const fails = PAIRS.filter(([f,b,k])=>!['ui (decorative)','fill (label identifies it)'].includes(k) && contrast(B.sem[f],B.sem[b]) < (k==='text'?4.5:3)).map(([f,b])=>`${f}/${b}`);
+  document.getElementById('state').textContent = JSON.stringify({ variant: cur, name: B.v.name, statusStyle: B.v.statusStyle, semantic: B.semRefs, failingPairs: fails }, null, 2);
+}
+
+function go(d) { const ks=Object.keys(VARIANTS); cur = ks[(ks.indexOf(cur)+d+ks.length)%ks.length]; const u=new URL(location); u.searchParams.set('variant',cur); history.replaceState(null,'',u); render(); }
+document.getElementById('prev').onclick=()=>go(-1);
+document.getElementById('next').onclick=()=>go(1);
+addEventListener('keydown', e => { if (e.target.closest('input,textarea,[contenteditable]')) return; if (e.key==='ArrowLeft') go(-1); if (e.key==='ArrowRight') go(1); });
+render();
+</script>
+</body>
+</html>
