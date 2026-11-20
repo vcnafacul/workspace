@@ -3,8 +3,11 @@
 > **Migrado do wayfinder** (`343-design-system`, 2026-10-28). Conteúdo mantido em inglês. Na migração
 > entraram só os números `D1…D16` (§1) e os caminhos dos links; o resto do texto é o original. Numeração nunca
 > reaproveitada; decisão mudada: `~~Dn~~ substituída por Dm`. Cite como `tickets/059 D8`.
+>
+> **Revisão de 2026-11-20** contra `origin/develop` @ `6d782d4d`: decisões D17–D22 (§1.1, em pt-BR) e
+> atualizações em §3, §6, §7.1, §7.2, §7.4 e §7.5. Cada linha acrescentada nas tabelas cita a sua decisão.
 
-Source: [mapa.md](planejamento/mapa.md), issue [Montar Design System no Figma](https://github.com/vcnafacul/client-vcnafacul/issues/343). Written 2026-10-28 from the resolutions of tickets 01–14. Code facts refer to `origin/develop` @ `bdb34525`.
+Source: [mapa.md](planejamento/mapa.md), issue [Montar Design System no Figma](https://github.com/vcnafacul/client-vcnafacul/issues/343). Written 2026-10-28 from the resolutions of tickets 01–14. Code facts refer to `origin/develop` @ `bdb34525`, revised 2026-11-20 against `origin/develop` @ `6d782d4d` (D17–D22).
 
 ## Outcome
 
@@ -49,6 +52,12 @@ Each decision's rationale and rejected options live in the planning ticket it li
 | D14 | Migration in one PR | §5.2, §7 | [Migration plan](planejamento/12-migration-plan.md) |
 | D15 | Writing, a11y, mobile guidelines | §5.4, §6 | [Written guidelines](planejamento/13-written-guidelines.md) |
 | D16 | Home / public expressive layer | §2.2, §2.4, §7.3 | [Expressive layer for the home page](planejamento/14-home-expressive-layer.md) |
+| D17 | `SegmentedControl` picks one value in place | §3, §6, §7.4 | §1.1 |
+| D18 | `Timeline` for event histories | §3, §7.4 | §1.1 |
+| D19 | `ErrorSummary` for forms split across tabs or steps | §3, §6, §7.4 | §1.1 |
+| D20 | `List` for lists without columns | §3, §7.4 | §1.1 |
+| D21 | Additions to Dialog, Input, Field and StatusBadge | §3, §7.4 | §1.1 |
+| D22 | Filters stay in the page, collapsed behind "Mais filtros (N)" under 768 (replaces "Sheet for filters" from D12) | §3, §6, §7.4 | §1.1 |
 
 Facts, not decisions: [Current UI inventory](planejamento/01-ui-inventory.md) · [research](pesquisa/01-ui-inventory.md), and [Options for a permanent component catalog](planejamento/02-catalog-options.md) · [research](pesquisa/02-catalog-options.md).
 
@@ -66,6 +75,126 @@ Facts, not decisions: [Current UI inventory](planejamento/01-ui-inventory.md) ·
 | Migration | [Migration plan](planejamento/12-migration-plan.md) |
 | Writing, a11y, mobile | [Written guidelines](planejamento/13-written-guidelines.md) |
 | Home / public | [Expressive layer for the home page](planejamento/14-home-expressive-layer.md) |
+
+## 1.1 Decisões da revisão de 2026-11-20
+
+Entre `bdb34525` e `6d782d4d` (27 commits), a base do design system não mudou: `package.json`,
+`tailwind.config.js`, `index.css`, `index.html`, `components/ui` e `dashV2` estão iguais. Mudaram as telas:
+
+- Código novo no estilo antigo: +93 usos das cores antigas, +33 das cores padrão do Tailwind e +42 de
+  `text-*`; um `ModalTemplate` novo, 2 arquivos novos com MUI, +4 com react-icons e um arquivo novo em
+  `molecules/`.
+- A chamada e o histórico de chamadas saíram da DataGrid e do PrimeReact.
+- Apareceram padrões que a §3 não cobria. As decisões abaixo cobrem esses padrões, e a §7.4 mapeia cada tela.
+
+### D17: `SegmentedControl` entra no design system
+
+`segmented-control.tsx` serve para escolher **um** valor entre 2 e 5 opções curtas, ali mesmo, sem trocar o
+conteúdo da tela. É feito sobre o `@radix-ui/react-radio-group`, que a §4 já adiciona: semântica de rádio e
+navegação por setas, sem dependência nova. O visual e as props estão na §3.
+
+**Regra de uso:**
+- Abas trocam o conteúdo; o segmentado escolhe um valor.
+- Liga/desliga isolado é `Switch`.
+- Seleção múltipla é `Checkbox`.
+
+**Por quê:** o card 10 deixou o segmentado para depois. Mas já havia 5 implementações em outubro, e a
+chamada nova acrescentou mais 2: o período e a presença de cada aluno. Sem um componente, cada tela continua
+fazendo o seu.
+
+**Alternativas descartadas:**
+- `Tabs`: trocam conteúdo, e usar abas para escolher um valor mistura as duas coisas (a D12 já separava).
+- `ToggleGroup` do Radix: é uma dependência nova, e a seleção única não precisa de nada que o `RadioGroup`
+  não tenha.
+- `RadioGroup` em cartões: alto demais para uma linha de lista e para o topo de um modal.
+
+### D18: `Timeline` para históricos de eventos
+
+`timeline.tsx` é uma lista ordenada com um item por evento. Cada item tem um marcador com ícone, tingido
+pelo tipo do evento; uma linha que liga o evento ao próximo; quem fez e o que fez; quando; e, se houver, o
+detalhe e uma ação. O visual está na §3.
+
+**Por quê:** o histórico da demanda (`AbaHistorico`, novo) e o da questão (`TabHistoricoRefactored`, que já
+existia e a §3 não cobriu) são linhas do tempo feitas à mão, com cores padrão do Tailwind.
+
+**Alternativas descartadas:**
+- `List` (D20) com ícone: perde a ligação entre os eventos, que é o que diz "isto é uma sequência".
+- Tabela: um histórico não tem colunas.
+
+### D19: `ErrorSummary` para formulários divididos em abas ou etapas
+
+`error-summary.tsx`, sobre o `Alert` `destructive`, lista o que impede salvar. Cada item traz a mensagem,
+onde o campo está ("aba Alternativas") e um link "Ir até o campo", que troca de aba ou de etapa e põe o foco
+no campo.
+- Num Dialog, ele vai no `banner` (D21), fixo sob o cabeçalho em todas as abas.
+- Alterações não salvas, sem erro, usam `Alert` `warning` no mesmo lugar. O botão de salvar diz o que salva.
+
+**Regra (§6, Errors):** o erro continua embaixo do campo. O resumo **soma**, não substitui, e só aparece
+quando o campo com erro pode estar fora da vista (outra aba, outra etapa).
+
+**Por quê:** o modal da questão ganhou isso no #965 (`PendenciasDoConteudo`). Sem o resumo, o salvar ficava
+desabilitado sem dizer por quê quando o erro estava em outra aba. A regra de erros da spec não previa esse
+caso.
+
+**Alternativas descartadas:**
+- Toast com os erros: some, e a §6 já proíbe erro de campo em toast.
+- Só marcar a aba com um ponto: diz onde, mas não o quê.
+
+### D20: `List` para listas sem colunas
+
+`list.tsx` (`List` + `ListItem`) é para listas que não têm colunas, ordenação nem seleção. Cada linha tem
+título, informações secundárias, selos e ações no fim. Os estados de carregando, vazio e erro são os mesmos
+da DataTable. O visual está na §3.
+
+**Por quê:** o histórico de chamadas e a lista de alunos da chamada saíram da DataGrid para listas simples
+dentro de um modal. A DataTable seria peso sem uso.
+
+**Alternativas descartadas:**
+- `DataTable` com `renderMobileCard` em toda largura: monta colunas que ninguém vê.
+- Um `Card` por linha: borda e espaço demais numa lista de 40 alunos.
+
+### D21: acréscimos ao Dialog, Input, Field e StatusBadge
+
+Não mudam o que a D12 decidiu, só completam:
+
+- **Dialog:**
+  - O cabeçalho e o rodapé ficam fixos, e só o corpo rola.
+  - A altura máxima é `calc(100dvh-2rem)` a partir de 768; abaixo disso, o Dialog já é tela cheia.
+  - Novo `banner`, fixo logo abaixo do cabeçalho, para o resumo de erros e avisos.
+  - O rodapé aceita, à esquerda, um texto de estado que o leitor de tela anuncia ("12 presentes · 3
+    ausentes").
+  - Diálogo com campos de formulário é `Dialog`, nunca `AlertDialog`: o `AlertDialog` é só para confirmar.
+- **Input:** o espaço do fim do campo aceita um botão de ícone com `aria-label` (por exemplo "Copiar
+  e-mail") ou um texto de unidade (`suffix`, por exemplo "% de faltas").
+- **Field:** com `maxLength`, mostra um contador ("12/500") na linha da dica.
+- **StatusBadge:** ganha `icon` e `value` opcionais. No risco de evasão, por exemplo, vai `warning`, com
+  ícone de alerta e "32%". Status nunca usa laranja: laranja é `cta` e `highlight`.
+
+**Por quê:** os três modais novos (chamada, histórico, alerta de evasão) refazem à mão o cabeçalho e o
+rodapé fixos e a altura em `dvh`. É isso que mantém o botão principal visível no celular. Copiar contato
+(#956), "% de faltas" e o contador do motivo de rejeição (#962) voltariam como `className` solto em cada
+tela.
+
+**Alternativas descartadas:**
+- Deixar cada tela compor: foi o que produziu três versões do mesmo modal.
+
+### D22: filtros de lista ficam na página
+
+Os filtros de uma lista ficam numa grade na própria página, acima da lista, em todas as larguras.
+- Abaixo de 768, só a busca fica visível. Os outros filtros ficam atrás de um botão "Mais filtros (N)", com
+  N filtros ativos, que expande a grade no lugar.
+- A busca por texto espera 400ms depois da última tecla.
+- Esse vira o comportamento do `DashFilterBar`.
+
+Substitui o "Sheet: right side for filters" da D12. O `Sheet` da direita fica só para detalhes.
+
+**Por quê:** foi o que o time escolheu no dashGeo (#961). O motivo está no código: no celular, os filtros
+ocupavam a primeira tela inteira. E os filtros aplicam na hora, então não existe o "Aplicar" que
+justificaria um painel por cima da lista.
+
+**Alternativas descartadas:**
+- `Sheet` com os filtros: esconde a lista enquanto se filtra e pede um botão de aplicar.
+- Filtros sempre abertos no celular: é o problema que o dashGeo resolveu.
 
 ---
 
@@ -436,24 +565,28 @@ Every component is shadcn/Radix + **cva** + `cn`, restyled to tokens, with a col
 | Component | File | Spec |
 |---|---|---|
 | **Button** | `button.tsx` | **Variants:** `cta`, `primary` (default), `secondary`, `outline` (border `input`), `ghost`, `destructive`, `link`. **Sizes:** `sm` (h-8), `md` (h-9; h-11 < 768), `lg` (h-11), `icon` (square; **`aria-label` required by the TS type**). Props: `loading` (spinner + label, disabled), `asChild`. **States:** hover (cta/primary/destructive darken 12%, `primary` lightens; outline/ghost/secondary → `bg-accent`), focus-visible `ring-2 ring-ring ring-offset-2`, active `translate-y-px`, disabled `opacity-50 cursor-not-allowed`. **At most one `cta` per screen.** |
-| **Field** | `field.tsx` (new) | Wraps every control: `label` (text-label), the control, then `hint` (caption, muted) **or** `error` (caption, muted text + `destructive` x-circle icon; control gets `aria-invalid` and a `destructive` border; linked via `aria-describedby`). **`required` → red `*` after the label (`aria-hidden`) + `required`/`aria-required` on the control.** `FormLegend` renders "* obrigatório" once per form. |
-| Input / Textarea | `input.tsx`, `textarea.tsx` | Border `input`, `rounded-md`, placeholder `muted-foreground`, disabled `bg-muted opacity-60`, optional leading/trailing icon slots. Correct `type`/`inputMode`/`autoComplete` (CPF/CEP numeric, tel, email, `one-time-code`). |
+| **Field** | `field.tsx` (new) | Wraps every control: `label` (text-label), the control, then `hint` (caption, muted) **or** `error` (caption, muted text + `destructive` x-circle icon; control gets `aria-invalid` and a `destructive` border; linked via `aria-describedby`). **`required` → red `*` after the label (`aria-hidden`) + `required`/`aria-required` on the control.** `FormLegend` renders "* obrigatório" once per form. **D21:** `maxLength` shows a counter (`text-caption muted-foreground`, right-aligned on the hint line). |
+| Input / Textarea | `input.tsx`, `textarea.tsx` | Border `input`, `rounded-md`, placeholder `muted-foreground`, disabled `bg-muted opacity-60`, optional leading/trailing icon slots. Correct `type`/`inputMode`/`autoComplete` (CPF/CEP numeric, tel, email, `one-time-code`). **D21:** the trailing slot also takes an icon `Button` (`ghost`, `aria-label`, e.g. copy) or a unit `suffix` ("% de faltas"). |
 | Select | `select.tsx` | Radix Select. The open list is a `menu` (`shadow-md`, `z-popover`, `accent` highlight, check on the selected item). |
 | **Combobox** | `combobox.tsx` (new) | Popover + `cmdk`. **Needed:** it replaces MUI `Autocomplete` (2 files), so the "only if needed" condition from ticket 03 is met. Adds the `cmdk` dependency. |
 | Checkbox / RadioGroup / Switch | `checkbox.tsx`, `radio-group.tsx` (new), `switch.tsx` (new) | On = `primary`, off border `input`. Checkbox has an indeterminate state. Labels are clickable, and option rows are 44px on mobile. |
 | **DatePicker / DateRangePicker** | `calendar.tsx`, `date-picker.tsx`, `date-range-picker.tsx` (from dashV2 `DashDateRangeFilter`) | react-day-picker v9 in a Popover with pt-BR labels. Selected = `primary`, range = `accent`, today = 1px `input` ring. Field trigger with a calendar icon. Dates are formatted with `date-fns-tz` in `America/Sao_Paulo`. |
 | Card | `card.tsx` | `rounded-lg border bg-card`, **no shadow**. Parts: Header/Title (`text-h4`)/Description/Content/Footer. |
-| **Dialog** | `dialog.tsx` | `size`: `sm` 400 / `md` 560 (default) / `lg` 800 / `full`. `rounded-xl shadow-lg`, scrim `foreground/55`, close icon button, Title `text-h3`, Description `body-sm muted`, footer with secondary `outline` + main `primary`/`cta`. **Full-screen under 768.** Radix focus trap + Esc. |
+| **Dialog** | `dialog.tsx` | `size`: `sm` 400 / `md` 560 (default) / `lg` 800 / `full`. `rounded-xl shadow-lg`, scrim `foreground/55`, close icon button, Title `text-h3`, Description `body-sm muted`, footer with secondary `outline` + main `primary`/`cta`. **Full-screen under 768.** Radix focus trap + Esc. **D21:** header and footer stay fixed and only the body scrolls; max height `calc(100dvh-2rem)` from 768 up. A `banner` slot sits pinned under the header (ErrorSummary, warnings). The footer takes an `aria-live` status text on the left ("12 presentes · 3 ausentes"). A dialog with form fields is a `Dialog`, never an `AlertDialog`. |
 | AlertDialog | `alert-dialog.tsx` | `size="sm"`. **Title and action button name the action** ("Excluir prova"), and destructive actions use the `destructive` variant. |
-| Sheet | `sheet.tsx` | Right side for filters and details. **Left side is the mobile nav** (§6). |
+| Sheet | `sheet.tsx` | ~~Right side for filters and details.~~ Right side for details; filters stay in the page (D22). **Left side is the mobile nav** (§6). |
 | **DataTable** | `data-table.tsx` (from dashV2 `DashTable`) | Columns: `{ id, header, cell, align, sortable, width, mobile?: "title" \| "meta" \| "status" \| "hidden" }`. Props: `rows`, `getRowId`, `sort` + `onSortChange` (server or client), `selection` + `onSelectionChange`, `pagination` (`page`, `pageSize`, `total`, `onPageChange`, `pageSizeOptions`; server-side capable), `state: "loading" \| "empty" \| "ready"`, `toolbar`, `bulkActions`, `rowActions`, `renderMobileCard?`. **Look:** header `h-9 text-caption muted-foreground`, sorted header in `foreground` with an arrow, rows `h-10`, hover `bg-page`, selected `bg-accent`, numbers right-aligned and tabular, status column = `StatusBadge look="dot"`, `⋯` row menu (DropdownMenu), selection bar (count + bulk actions) when rows are selected, footer "Mostrando X–Y de N" + Pagination, empty state (icon + `h4` + hint + "Limpar filtros"), loading = skeleton rows. **Mobile card:** derived from the `mobile` roles (defaults: first column = title, `StatusBadge` column = status, next 2 columns = meta joined by " · ", rest hidden). Selection and row actions always show. `renderMobileCard` is the escape hatch. dashV2 `hideBelow` → `mobile: "hidden"`. |
 | Table | `table.tsx` | Low-level parts used by DataTable and simple static tables. |
 | Tabs | `tabs.tsx` | **Underline only:** baseline 1px `border`, active 2px `primary` underline + `foreground`, inactive `muted-foreground`, height = control height. |
+| **SegmentedControl** | `segmented-control.tsx` (new, D17) | Picks **one** of 2–5 short options in place: tabs switch content, this picks a value. Built on `@radix-ui/react-radio-group` (radio semantics, arrow keys). Track `bg-muted rounded-md p-1`; selected item `bg-background text-foreground` + 1px `border` (no shadow); others `muted-foreground`, hover `foreground`; `text-button`; control height; `size="sm"` for list rows; `options: {value, label, icon?}`; `aria-label` required by the TS type. |
 | DropdownMenu | `dropdown-menu.tsx` (new, `@radix-ui/react-dropdown-menu`) | `shadow-md z-popover rounded-lg`. Items are 32px (44 on mobile), with optional label, leading icons, separators, shortcut hint, and a destructive item in `text-destructive`. It replaces the headlessui header menu. |
 | Popover / Tooltip | `popover.tsx`, `tooltip.tsx` | Popover = card + `shadow-md`. Tooltip = `bg-primary text-primary-foreground text-caption rounded-md`, opens on hover, focus **and tap**. |
-| **StatusBadge** | `status-badge.tsx` (from dashV2) | `variant`: `success \| warning \| destructive \| info \| neutral`. `look`: **`dot`** (neutral `muted` pill + colored dot + `foreground` text; required inside DataTable and lists) or **`tint`** (`*-muted` background, colored dot + text; standalone and detail pages). dashV2 `done/running/missing/info/neutral` → `success/warning/destructive/info/neutral`. |
+| **StatusBadge** | `status-badge.tsx` (from dashV2) | `variant`: `success \| warning \| destructive \| info \| neutral`. `look`: **`dot`** (neutral `muted` pill + colored dot + `foreground` text; required inside DataTable and lists) or **`tint`** (`*-muted` background, colored dot + text; standalone and detail pages). dashV2 `done/running/missing/info/neutral` → `success/warning/destructive/info/neutral`. **D21:** optional `icon` and `value` (dropout risk: `variant="warning"`, alert icon, "32%"). Status never uses orange: orange is `cta`/`highlight`. |
 | Badge | `badge.tsx` | `default` (`primary`), `secondary`, `outline`. |
 | Alert | `alert.tsx` (new) | Tinted: `*-muted` background, status icon + title in the status color, message in `foreground`, optional action (for example "Tentar de novo"). |
+| **ErrorSummary** | `error-summary.tsx` (new, D19) | On `Alert` `destructive`: "N problemas impedem salvar", each item = the message + where it is ("aba Alternativas") + an "Ir até o campo" link that switches tab or step and focuses the field. In a Dialog it goes in the `banner`. It adds to the field errors, never replaces them. |
+| **Timeline** | `timeline.tsx` (new, D18) | `<ol>`, one item per event: 32px round marker with a 16px lucide icon tinted by `variant` (`success\|warning\|destructive\|info\|neutral`), 1px `border` connector to the next item, who (`font-semibold`) + what happened (`text-body`), when (`text-caption muted-foreground`, §6 formats), optional detail (`bg-muted rounded-md px-3 py-2`) and action (`outline sm`). Loading, empty and error states as in `List`. |
+| **List** | `list.tsx` (new, D20) | `List` + `ListItem` for lists without columns: `title` (`text-body font-medium`), `meta` (`text-body-sm muted-foreground`, joined by " · "), `badges`, `trailing` (actions or a `SegmentedControl size="sm"`). 1px `border` dividers, rows ≥ 44px under 768, `state: "loading" \| "empty" \| "error" \| "ready"` like DataTable. Scrolls inside the Dialog body. |
 | Toast | `toast.tsx` (react-toastify setup + CSS) | `<ToastContainer position="top-right" limit={3} pauseOnHover closeButton newestOnTop />`, offset below `--header-h`, `z-toast`. **On mobile:** top, full width. **Defaults by type: success/info `autoClose: 5000`; warning/error `autoClose: false`.** The defaults live in **`src/lib/toast.ts`**, which re-exports react-toastify's `toast` with the same API and applies the per-type `autoClose` (explicit per-call options still win). The toast codemod rewrites `from "react-toastify"` → `from "@/lib/toast"` in the ~130 importing files. **No call changes, only the import path.** Look: white card, `border`, `shadow-md`, status icon, title + optional message, close button. `--toastify-*` variables point at tokens and `theme="colored"` is removed. |
 | Skeleton | `skeleton.tsx` | `bg-primary/10 animate-pulse rounded-md`. dashV2 `LinhasSkeleton`/`BlocosSkeleton` move here as `TableSkeleton`. |
 | Spinner | `spinner.tsx` (new) | lucide `Loader2` + `animate-spin`. Sizes inline (16), button (16), page (32). `aria-label="Carregando"`. |
@@ -536,10 +669,10 @@ It also checks that `palette.ts` equals the CSS primitives.
 | Foundations / Typography | `Typeset` of every step at both widths, `prose` vs `body`, the 12px minimum, the weights loaded |
 | Foundations / Spacing, Radius, Shadows, z-index, Layout, Breakpoints | the §2.5–2.6 tables, plus "our `sm` = Tailwind `md`" |
 | **Voice and writing** | Friendly and direct, with **"você"**. **Sentence case** everywhere. **Buttons start with a verb and name the object** ("Excluir prova"; never "OK"/"Sim"/"Confirmar" alone). "!" only for real celebrations. No codes or jargon. UPPERCASE only via `text-overline`. **pt-BR formats** via `Intl`/`date-fns-tz` (`America/Sao_Paulo`): `12/11/2026` in tables and forms, `12 de novembro de 2026` in prose, "há 3 dias", `1.284`, `7,5`, no "1.2k" in admin. **Empty state** = what's missing + why (filters?) + an action. |
-| **Errors** | **What happened + what to do** ("Não foi possível salvar a prova. Verifique sua conexão e tente de novo."), with no blame and no "Erro ao". **Field errors under the field**, never in a toast, stating the rule ("Ano deve ter 4 dígitos."). Toasts only for things with no place on screen. Screen-blocking errors = inline `Alert` + "Tentar de novo". It applies to new code and touched screens. The migration PR keeps existing wording. |
+| **Errors** | **What happened + what to do** ("Não foi possível salvar a prova. Verifique sua conexão e tente de novo."), with no blame and no "Erro ao". **Field errors under the field**, never in a toast, stating the rule ("Ano deve ter 4 dígitos."). Toasts only for things with no place on screen. Screen-blocking errors = inline `Alert` + "Tentar de novo". It applies to new code and touched screens. The migration PR keeps existing wording. **D19:** a form split across tabs or steps also shows an `ErrorSummary` at the top while an error is out of view. |
 | **Accessibility** | The decided rules (AA contrast, 12px minimum, solid ring, 3:1 inputs, 44px mobile targets, Radix focus management, required markup), plus: one `h1` per page with no skipped levels; every control in a `Field`; icon-only buttons need `aria-label` (TS-required); color is never the only signal; meaningful `alt` or `alt=""`; no clickable `div`/`span`; visible focus; `prefers-reduced-motion` skips GSAP/Motion page and section animations (spinners and skeleton pulse stay); `lang="pt-BR"`. Enforced by the axe panel + jsx-a11y. |
 | **Responsiveness** | Tables → cards, full-screen dialogs, 44px targets. **Nav:** under 768, the public menu and the dash sidebar open as a **left Sheet** from a header hamburger (replaces `organisms/menuMobile`), closing on Esc, outside tap and navigation. **Forms:** single column, labels above, actions full width at the bottom with the main action on top, a sticky action bar on long forms (inscription steps). Correct `type`/`inputMode`/`autoComplete`. **Nothing hover-only.** |
-| **Usage rules** | At most one `cta` per screen · borders for in-page surfaces, shadows only for floating elements · `StatusBadge` dot in tables and lists, tint elsewhere · `prose` for reading, `body` for UI · `muted-foreground` is the only secondary text color · red asterisk for required fields · error/warning toasts persist, success/info close after 5s · underline tabs only · 12px minimum · `text-hero` home-only, `text-display` for home/marketing section titles. |
+| **Usage rules** | At most one `cta` per screen · borders for in-page surfaces, shadows only for floating elements · `StatusBadge` dot in tables and lists, tint elsewhere · `prose` for reading, `body` for UI · `muted-foreground` is the only secondary text color · red asterisk for required fields · error/warning toasts persist, success/info close after 5s · underline tabs only · 12px minimum · `text-hero` home-only, `text-display` for home/marketing section titles · tabs switch content, `SegmentedControl` picks a value (D17) · list filters stay in the page, under 768 behind "Mais filtros (N)" (D22). |
 | Usage pages | DataTable, DatePicker, Dialog: when to use, when not to, and mobile behavior. |
 
 ---
@@ -548,7 +681,7 @@ It also checks that `palette.ts` equals the CSS primitives.
 
 ### 7.1 Ground rules
 
-- **One PR into `develop`** covering everything: about 519 of 1,327 non-test source files.
+- **One PR into `develop`** covering everything: about 527 of 1,351 non-test source files (2026-11-20 recount: 24 new source files, 8 more that need migrating).
 - **No bridges:** every V1 use is replaced directly. All retired dependencies are removed. **The guard is strict from the merge.**
 - **Ordered commits, one per step, each green on its own** (`tsc`, lint, vitest, `vite build`; plus `build-storybook` once commit 4 lands). The PR is **merged with a merge commit (no squash)**.
 - **Branch from a fresh `develop`, rebase daily, and re-run the codemods after each rebase.** The two authors agree on a **2–3 day UI freeze** for final QA and merge.
@@ -563,7 +696,7 @@ It also checks that `palette.ts` equals the CSS primitives.
 4. **Storybook:** `.storybook/`, MDX foundation and guideline pages (§6).
 5. **`ui` components** (§3), each with stories, plus the stories smoke test. `DataTable`, `StatusBadge`, `DateRangePicker` and `TableSkeleton` move in from dashV2.
 6. **Codemod sweeps**, one commit each (§7.3): colors → semantic; sizes → steps; weights; radius/shadow/z-index; arbitrary values; icons → lucide.
-7. **Component families**, one commit each (§7.4): V1 `Button`; `ModalTemplate`/`ModalConfirmCancel`/`ModalTabTemplate`/`AlertDialogUI`/hand-rolled overlays → Dialog/AlertDialog/Sheet; V1 `Text` → step classes; V1 inputs (`InputFactory` family, `atoms/select`, checkbox/radio/toggle) → `Field` + controls; MUI by family; **one commit per DataGrid screen → `DataTable`**; PrimeReact → DatePicker/Select; headlessui → DropdownMenu; loaders → Skeleton/Spinner; toast setup; mobile nav (left Sheet); jsx-a11y violations fixed alongside.
+7. **Component families**, one commit each (§7.4): V1 `Button`; `ModalTemplate`/`ModalConfirmCancel`/`ModalTabTemplate`/`AlertDialogUI`/hand-rolled overlays → Dialog/AlertDialog/Sheet; V1 `Text` → step classes; V1 inputs (`InputFactory` family, `atoms/select`, checkbox/radio/toggle) → `Field` + controls; MUI by family; **one commit per DataGrid screen → `DataTable`**; PrimeReact → DatePicker/Select; headlessui → DropdownMenu; loaders → Skeleton/Spinner; toast setup; mobile nav (left Sheet); segmented controls → `SegmentedControl`, timelines → `Timeline`, lists without columns → `List`, list filters → D22 (D17–D22); jsx-a11y violations fixed alongside.
 8. **dashV2 split:** the template, toolbar, filter bar and footer use `ui`. `dashV2/tokens.ts` and `tokens.test.ts` are deleted. The `dashV2/README.md` rule "`components/ui/*` não são editados" is **replaced** by a pointer to this design system.
 9. **Home expressive layer:** `[data-theme]` overrides, `highlight`, `text-hero`/`text-display`, `brand-stripe` (header and footer stripe, SupportInbox bar), `sectionThemes.css` removed, `pink`/`green` themes removed from `SectionTheme`, home hex mapping (§7.3).
 10. **Cleanup:**
@@ -707,7 +840,9 @@ The rules apply to `className` strings, `cn()`/`clsx()` arguments, cva definitio
 | `atoms/checkbox`, `atoms/inputCheckbox`, `atoms/checkMapFilter` | `Checkbox` |
 | `atoms/radioButton` | `RadioGroup` |
 | `atoms/toggle`, `atoms/permissionToggle` | `Switch` |
-| `molecules/tipoDeEnvio` (segmented) | **review**: `RadioGroup` (cards) or `Tabs` |
+| `molecules/tipoDeEnvio` (segmented) | ~~**review**: `RadioGroup` (cards) or `Tabs`~~ `SegmentedControl` (D17) |
+| `pages/dashboard/components/Segmented`, `molecules/materiaRadar`, the view switch in `organisms/classSimuladoAnalytics` | `SegmentedControl` (D17) |
+| `geoSearch/components/BotaoConfirmar`, `relatorioSimulado/ChipsDoDetalhe` (`aria-pressed` toggles, not segmented) | **review**: a single on/off → `Switch` or `Button` with `aria-pressed`; multi-select chips → `Checkbox` group |
 | `atoms/tooltip` | `Tooltip` |
 | `atoms/dropdownMenu` (headlessui) | `DropdownMenu` |
 | `atoms/cursinhoAccordin`, MUI `Collapse` | `Accordion` |
@@ -726,7 +861,7 @@ The rules apply to `className` strings, `cn()`/`clsx()` arguments, cva definitio
 | MUI `Chip` | `StatusBadge` (status) or `Badge` |
 | MUI `Paper` | `Card` |
 | MUI `Table*` | `Table` (or `DataTable` when sorting/paging) |
-| MUI `DataGrid` (8 screens) | `DataTable`: `checkboxSelection` → `selection`; `paginationMode="server"` + `onPaginationModelChange` → `pagination` (server); `onSortModelChange` → `onSortChange`; `renderCell` → column `cell`; `disableRowSelectionOnClick` → default; `pageSizeOptions` → `pagination.pageSizeOptions` |
+| MUI `DataGrid` (6 screens; the attendance history and new-attendance modals left it on 2026-10-30) | `DataTable`: `checkboxSelection` → `selection`; `paginationMode="server"` + `onPaginationModelChange` → `pagination` (server); `onSortModelChange` → `onSortChange`; `renderCell` → column `cell`; `disableRowSelectionOnClick` → default; `pageSizeOptions` → `pagination.pageSizeOptions` |
 | MUI `ToggleButtonGroup` (as tabs) | `Tabs` |
 | PrimeReact `Calendar`, `atoms/controlCalendar` | `DatePicker` (ranges → `DateRangePicker`) |
 | PrimeReact `Dropdown` | `Select` |
@@ -734,6 +869,16 @@ The rules apply to `className` strings, `cn()`/`clsx()` arguments, cva definitio
 | `organisms/menuMobile`, dash sidebar on mobile | left `Sheet` from the header hamburger |
 | `components/ui/accordion.tsx` (unused) | adopted; `ui/form.tsx` deleted |
 | V1 kit dead code (`atoms/{a4Page, barChart, …}`, `templates/dashCardTemplate`) | deleted in cleanup |
+| **Screens added up to 2026-11-20** | |
+| Attendance (`partnerClassWithStudents/modals/newAttendanceRecordModal`) | `Dialog` (D21: fixed header and footer, footer status "N presentes · M ausentes") + `DatePicker` + period `SegmentedControl` + search `Input` + `List` whose rows end in a Presente/Ausente `SegmentedControl size="sm"`. Risk pill → `StatusBadge variant="warning"` with icon and % (D21); "justificado" → `Badge variant="secondary"`; risk banner → `Alert` warning |
+| Attendance history (`partnerClassWithStudents/modals/attendanceHistoryModal`) | `Dialog` + `List` (row actions: ghost `Button` "Ver", icon `Button` "Excluir" → `AlertDialog`) + `Pagination`; empty and error states from `List` |
+| Dropout alert (`partnerClass/alertaEvasao/alertaEvasaoModal`, `botaoAlertaEvasao`) | `Dialog size="sm"` + `Field` + `Input` with `suffix` (D21); the live example → `Alert` info. MUI `Button outlined` + `MdWarningAmber` → `Button variant="outline"` + lucide `TriangleAlert` |
+| Rejection reason (`dashGeo/modals/modalMotivoRejeicao`, on `ModalConfirmCancel`) | `Dialog size="sm"` (it has fields, so not `AlertDialog`) + `RadioGroup` + `Textarea` in a `Field` with counter (D21); the action button names the action |
+| Copy contact (`dashGeo/modals/modalEditDashGeo/Fields/prepCourseInfo`) | `Field` + `Input` with a trailing icon `Button` (lucide `Copy`, `aria-label="Copiar <campo>"`) (D21) |
+| `molecules/toggleDadosSensiveis` (MUI `Switch` + `FormControlLabel`) | `Switch` with its label; the molecule is deleted in cleanup |
+| `dashGeo/FiltrosDoGeo` (on `dashV2` tokens) | `DashFilterBar` rebuilt on `ui` fields, with the D22 mobile behavior |
+| Question content issues (`dashQuestionNew/modals/tabs/TabConteudo/PendenciasDoConteudo`) and the `aviso` of `ModalTabTemplateQuestion` | `ErrorSummary` (D19) in the Dialog `banner` (D21); unsaved changes → `Alert` warning with "Salvar enunciado e alternativas"; tabs controlled from outside (`value`/`onValueChange`) |
+| Timelines: `dashContent/modals/demandaModal/AbaHistorico`, `dashQuestionNew/modals/tabs/TabHistoricoRefactored` | `Timeline` (D18) |
 
 ### 7.5 Verification
 
@@ -744,6 +889,7 @@ The rules apply to `className` strings, `cn()`/`clsx()` arguments, cva definitio
    - **Student:** inscription steps 1–3 ★ (asterisks, sticky bar, mobile keyboards) · taking a simulado ★ · simulation history and report · account/profile · chat widget.
    - **Admin:** provas list (DataTable, dot badges, row menu, mobile cards) ★ · question editor (`dashQuestionNew` tabs, rich text) · content/frentes · class with students and attendance modals (ex-DataGrid: selection, server pagination) ★ · students enrolled (server sort/pagination, export) · inscription student manager · analytics (charts with `chartSeries`) · news, push, roles, collaborators · every confirm dialog (AlertDialog naming the action) ★.
    - **Cross-cutting:** toasts (error persists, success closes after 5s, max 3) · focus ring visible everywhere ★ · mobile nav Sheet ★ · reduced-motion on the home page.
+   - **Added 2026-11-20:** attendance ★ (period and presence segmented, footer visible at 390, risk badges) · attendance history (empty, error, pagination) · dropout alert · dashGeo filters ("Mais filtros (N)" at 390), rejection reason, copy contacts · hide sensitive data switch · question content `ErrorSummary` ("Ir até o campo" across tabs) ★ · demand history timeline.
 
 ---
 

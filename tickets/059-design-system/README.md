@@ -21,8 +21,8 @@ Tailwind, uma biblioteca de componentes só (shadcn/Radix + cva, em `src/compone
 catálogo e testes de guarda que mantêm o código no sistema. A migração de todas as telas e a remoção das
 bibliotecas substituídas estão na [spec](spec.md) (§7).
 
-A spec foi fechada em 2026-10-28 sobre o `origin/develop` @ `bdb34525`. **Antes de virar `pronto`, ela será
-revista contra o `develop` de hoje**: telas, componentes e bibliotecas que entraram depois daquele commit.
+A spec foi fechada em 2026-10-28 sobre o `origin/develop` @ `bdb34525` e revista em 2026-11-20 contra o
+`6d782d4d`: as telas novas trouxeram as decisões D17–D22 e entraram no mapeamento da migração.
 
 ## Muda algum fluxo de quem usa a plataforma?
 
