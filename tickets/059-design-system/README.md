@@ -1,10 +1,10 @@
 ---
 titulo: Design system do client
-status: planejando        # planejando → pronto → em-andamento → concluido | cancelado
+status: em-andamento      # planejando → pronto → em-andamento → concluido | cancelado
 issue: vcnafacul/client-vcnafacul#343
 criado: 2026-10-28
 responsavel: GessioMori
-repos: [client-vcnafacul]
+repos: [client-vcnafacul, docs]
 ---
 
 > **Migrado do wayfinder** (`343-design-system`). O planejamento foi feito em inglês e foi mantido assim:
@@ -30,6 +30,11 @@ Não muda fluxos, mas muda a aparência de todas as telas. A spec (D14) prevê u
 para as coordenações de cursinho no lançamento. Se as páginas do site de ajuda tiverem prints, vale um card
 `DOCS` no repo `docs` para trocá-los.
 
+## Ordem de deploy
+
+`client-vcnafacul` (card 01) → `docs` (card 03): os prints novos do site de ajuda só existem depois que o
+visual novo estiver no ar.
+
 ## Fica para depois
 
 - A biblioteca no Figma pedida na issue #343: o código é a fonte da verdade (D1).
@@ -41,6 +46,8 @@ para as coordenações de cursinho no lançamento. Se as páginas do site de aju
 ## Material
 
 - [`spec.md`](spec.md): a spec de implementação, com o índice de decisões em §1.
+- [`plano.md`](plano.md): as tarefas de implementação, cada uma ligada a um card.
+- Cards: [01 migração](01-FRONT-migracao-design-system.md) · [02 homologação](02-QA-homologacao-design-system.md) · [03 nota e site de ajuda](03-DOCS-nota-e-site-de-ajuda.md).
 - [`planejamento/mapa.md`](planejamento/mapa.md): o mapa do wayfinder, com o resumo de cada decisão.
 - `planejamento/01…14-*.md`: as perguntas do planejamento, com a justificativa e as alternativas
   descartadas de cada decisão (antes, `tickets/` do wayfinder).
