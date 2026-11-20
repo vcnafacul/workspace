@@ -1,0 +1,177 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway. Wayfinder ticket: "Expressive layer for the home page" (343-design-system/tickets/14-home-expressive-layer.md)
+  Question: which tokens each [data-theme] section re-points, what the CTA does on dark sections, the gradient's fate,
+  and how big the hero headline gets.
+  Mirrors homeV2's real section order: hero (marine) · about (marine) · impact · prep-courses · news · features
+  (neutral) · map (marine), plus quemSomos' sponsors (yellow). pink/green themes exist in sectionThemes.css but no page uses them.
+  Variants via ?variant=A|B|C (bottom bar or ← →); width via the bar (?w=mobile):
+    A — Faithful: today's marine/neutral rhythm. Inside dark sections the CTA flips to bright #FF7600 + marine text,
+        mint is the accent on dark, the rainbow gradient survives as a thin brand stripe
+    B — Rhythm: alternate tinted sections (mint-50, pink-50) between neutrals; CTA stays #B35300 + white everywhere;
+        gradient retired
+    C — Inverted: on dark sections the main action is a WHITE button (primary re-pointed to white); orange only on light
+        sections; each section gets an accent hue on its eyebrow; gradient retired
+  Tokens: decided palette ("Color palette"), type steps ("Type scale"), radius/shadows ("Spacing…").
+-->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PROTOTYPE — Home expressive layer (#343)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --background:#FFFFFF; --foreground:#0B2747; --card:#FFFFFF; --card-foreground:#0B2747; --muted:#EBF1F8; --muted-foreground:#555B64;
+    --border:#DAE0E8; --input:#8B939D; --primary:#0B2747; --primary-foreground:#FFFFFF; --accent-foreground:#0B2747;
+    --cta:#B35300; --cta-foreground:#FFFFFF; --ring:#C55A00; --eyebrow:#B35300;
+    --shadow-md: 0 4px 12px rgba(11,39,71,.10), 0 1px 3px rgba(11,39,71,.06);
+    /* primitives used by themes */
+    --marine-900:#0B2747; --marine-800:#203A59; --marine-700:#364E6C; --marine-200:#D5E2F3; --marine-100:#E8F2FE; --marine-300:#B2C2D7;
+    --orange-500:#FF7600; --mint-400:#37D6B5; --mint-50:#EDFFF9; --mint-700:#006352; --mint-100:#D5FFF2;
+    --pink-50:#FFF8F9; --pink-600:#DA005A; --pink-100:#FFEDEF; --yellow-50:#FFFBE3; --yellow-300:#FFE53C; --yellow-700:#674A00; --yellow-100:#FFF8CC;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e6e8ec; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .chrome { max-width: 1280px; margin: 0 auto; padding: 20px 16px 0; font-size: 13px; color: #333; }
+  .chrome h1 { font-size: 18px; margin: 0 0 4px; }
+  .chrome li { margin: 2px 0; }
+  .site { max-width: 1280px; margin: 12px auto 120px; background: var(--background); font-family: Raleway, sans-serif; border: 1px solid #c9ced6; overflow: hidden; transition: max-width .2s; }
+  .site.mobile { max-width: 390px; }
+  h1,h2,h3,p { margin: 0; }
+
+  /* sections re-point semantic tokens only */
+  section.hs { background: var(--background); color: var(--foreground); padding: 72px 32px; }
+  .mobile section.hs { padding: 48px 16px; }
+  .inner { max-width: 1100px; margin: 0 auto; }
+  .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--eyebrow); }
+  .h-section { font-size: 40px; line-height: 1.15; font-weight: 800; margin-top: 10px; }
+  .mobile .h-section { font-size: 28px; }
+  .sub { color: var(--muted-foreground); font-size: 17px; line-height: 1.7; margin-top: 12px; max-width: 640px; }
+  .mobile .sub { font-size: 16px; }
+  .center { text-align: center; } .center .sub { margin-left: auto; margin-right: auto; }
+  .btn { font-family: Raleway, sans-serif; font-size: 15px; font-weight: 600; height: 44px; padding: 0 22px; border-radius: 6px; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+  .b-cta { background: var(--cta); color: var(--cta-foreground); }
+  .b-primary { background: var(--primary); color: var(--primary-foreground); }
+  .b-outline { background: transparent; color: var(--foreground); border-color: var(--border); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .card { background: var(--card); color: var(--card-foreground); border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .muted { color: var(--muted-foreground); }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 32px; }
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 32px; }
+  .mobile .g3, .mobile .g4 { grid-template-columns: 1fr; }
+  .stat { font-size: 40px; font-weight: 800; font-variant-numeric: tabular-nums; }
+  .hl { color: var(--hl, var(--mint-400)); }
+  .stripe { height: 4px; background: linear-gradient(to right, #37D6B5, #8CC408, #FFE53C, #FF7600, #DA005A); }
+  .hdr { display: flex; justify-content: space-between; align-items: center; padding: 14px 32px; background: var(--marine-900); color: #fff; }
+  .mobile .hdr { padding: 12px 16px; }
+  .hdr nav { display: flex; gap: 20px; font-size: 14px; font-weight: 600; }
+  .mobile .hdr nav { display: none; }
+  .logo { font-weight: 800; font-size: 18px; }
+  .map { height: 240px; border-radius: 8px; background: repeating-linear-gradient(45deg, var(--marine-800), var(--marine-800) 10px, var(--marine-700) 10px, var(--marine-700) 20px); display: grid; place-items: center; color: #fff; font-size: 14px; margin-top: 28px; }
+  .chip { display: inline-block; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 99px; background: var(--muted); color: var(--foreground); }
+
+  .switch { position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; align-items: center; background: #000; color: #fff; border-radius: 999px; padding: 8px 14px; font: 13px ui-sans-serif, system-ui; box-shadow: 0 8px 24px rgba(0,0,0,.35); z-index: 100; }
+  .switch button { background: none; border: 0; color: #fff; font-size: 13px; cursor: pointer; padding: 2px 8px; border-radius: 6px; }
+  .switch button.on { background: #fff; color: #000; }
+  .switch #label, .switch #hlabel { min-width: 120px; text-align: center; }
+  pre.state { max-width: 1280px; margin: 0 auto 120px; font: 11px ui-monospace, monospace; background: #fff; border: 1px dashed #aaa; border-radius: 8px; padding: 10px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="chrome"><h1 id="vtitle"></h1><div id="vdesc"></div></div>
+<div class="site" id="site"></div>
+<pre class="state" id="state"></pre>
+<div class="switch">
+  <button id="prev">◀</button><span id="label"></span><button id="next">▶</button>
+  <span style="opacity:.4">|</span>
+  <button data-w="desktop" class="w">desktop</button><button data-w="mobile" class="w">mobile 390</button>
+  <span style="opacity:.4">|</span>
+  <span>hero</span><button data-h="60" class="h">60px</button><button data-h="96" class="h">96px</button>
+</div>
+<script>
+// theme overrides per variant: semantic token → value (primitive var or hex)
+const DARK_BASE = { background:'var(--marine-900)', foreground:'#FFFFFF', card:'var(--marine-800)', 'card-foreground':'#FFFFFF', 'muted-foreground':'var(--marine-200)', border:'var(--marine-700)', muted:'var(--marine-800)' };
+const VARIANTS = {
+  A: { name:'Faithful',
+    desc:['Today\'s rhythm: <b>marine</b> for hero, about and map; <b>neutral</b> (white) for the rest; <b>yellow</b> only for sponsors.',
+      'Inside dark sections the <b>CTA flips to bright #FF7600 with marine text</b> (5.62:1), so it pops on navy. On light sections it stays #B35300 + white. Mint is the accent on dark.',
+      'The rainbow survives as a <b>thin brand stripe</b> (under the header, above the footer). pink/green themes are retired (unused).'],
+    themes: {
+      marine: { ...DARK_BASE, cta:'var(--orange-500)', 'cta-foreground':'var(--marine-900)', eyebrow:'var(--mint-400)', primary:'#FFFFFF', 'primary-foreground':'var(--marine-900)', hl:'var(--mint-400)' },
+      neutral: { eyebrow:'#B35300' },
+      yellow: { background:'var(--yellow-50)', eyebrow:'var(--yellow-700)', border:'var(--yellow-100)' },
+    },
+    order: ['marine','marine','neutral','neutral','neutral','neutral','marine','yellow'], stripe:true },
+  B: { name:'Rhythm',
+    desc:['Light sections <b>alternate tints</b>: white → mint-50 → white → pink-50, giving the long page a rhythm. Dark marine stays for hero and map.',
+      '<b>The CTA is #B35300 + white everywhere</b>, one rule with no theme exceptions. On navy it reads more muted.',
+      'Eyebrows take each section\'s hue (mint-700 on mint, pink-600 on pink). The rainbow gradient is retired.'],
+    themes: {
+      marine: { ...DARK_BASE, eyebrow:'var(--mint-400)', primary:'#FFFFFF', 'primary-foreground':'var(--marine-900)', hl:'var(--mint-400)' },
+      neutral: { eyebrow:'#B35300' },
+      green: { background:'var(--mint-50)', eyebrow:'var(--mint-700)', border:'var(--mint-100)' },
+      pink: { background:'var(--pink-50)', eyebrow:'var(--pink-600)', border:'var(--pink-100)' },
+      yellow: { background:'var(--yellow-50)', eyebrow:'var(--yellow-700)', border:'var(--yellow-100)' },
+    },
+    order: ['marine','marine','neutral','green','neutral','pink','marine','yellow'], stripe:false },
+  C: { name:'Inverted',
+    desc:['On dark sections the <b>main action is a white button</b> (primary re-pointed to white, marine text), and <b>orange appears only on light sections</b>. Navy stays calm and orange keeps one meaning: "act here".',
+      'Every section has a neutral background (white or marine). Color comes from the <b>eyebrow and highlight hue</b> (mint, pink, orange, yellow), one per section.',
+      'The rainbow gradient is retired.'],
+    themes: {
+      marine: { ...DARK_BASE, cta:'#FFFFFF', 'cta-foreground':'var(--marine-900)', eyebrow:'var(--mint-400)', primary:'transparent', 'primary-foreground':'#FFFFFF', hl:'var(--mint-400)' },
+      neutral: { eyebrow:'#B35300' },
+      'neutral-pink': { eyebrow:'var(--pink-600)', hl:'var(--pink-600)' },
+      'neutral-mint': { eyebrow:'var(--mint-700)', hl:'var(--mint-700)' },
+      yellow: { background:'#FFFFFF', eyebrow:'var(--yellow-700)' },
+    },
+    order: ['marine','marine','neutral','neutral-mint','neutral','neutral-pink','marine','yellow'], stripe:false },
+};
+let cur = new URLSearchParams(location.search).get('variant') || 'A'; if (!VARIANTS[cur]) cur='A';
+let mode = new URLSearchParams(location.search).get('w') || 'desktop';
+let hero = new URLSearchParams(location.search).get('hero') || '60';
+
+const vars = o => Object.entries(o||{}).map(([k,v])=>`--${k}:${v}`).join(';');
+function S(theme, html, v) { const t = v.themes[theme] || v.themes.neutral; return `<section class="hs" data-theme="${theme}" style="${vars(t)}">${html}</section>`; }
+
+function render() {
+  const v = VARIANTS[cur]; const o = v.order;
+  const heroPx = mode==='mobile' ? (hero==='96' ? 44 : 36) : +hero;
+  const html = `
+  <div class="hdr"><span class="logo">Você na Facul</span><nav><span>Quem somos</span><span>Cursinhos</span><span>Simulados</span><span>Notícias</span></nav><button class="btn" style="height:36px;background:${cur==='C'?'#fff':cur==='A'?'#FF7600':'#B35300'};color:${cur==='B'?'#fff':'#0B2747'}">Entrar</button></div>
+  ${v.stripe?'<div class="stripe"></div>':''}
+  ${S(o[0], `<div class="inner"><p class="eyebrow">Plataforma comunitária</p>
+     <h1 style="font-size:${heroPx}px;line-height:1.05;font-weight:800;letter-spacing:-.01em;margin-top:14px;max-width:900px">Educação popular, <span class="hl">digital e gratuita</span></h1>
+     <p class="sub" style="color:var(--muted-foreground)">Mais de 300 cursinhos populares usam a plataforma para gerir turmas, simulados e inscrições.</p>
+     <div class="row" style="margin-top:28px"><button class="btn b-cta">Quero participar</button><button class="btn b-primary" style="border-color:${cur==='C'?'#fff':'transparent'}">Conhecer a plataforma</button></div></div>`, v)}
+  ${S(o[1], `<div class="inner g3" style="margin-top:0;align-items:center"><div style="grid-column:span 2"><p class="eyebrow">Quem somos</p><h2 class="h-section">Feita por voluntários, para quem mais precisa</h2><p class="sub">Desde 2019 conectamos cursinhos populares, estudantes e professores voluntários.</p></div><div class="card" style="height:180px;display:grid;place-items:center">▶ vídeo</div></div>`, v)}
+  ${S(o[2], `<div class="inner center"><p class="eyebrow">Impacto</p><h2 class="h-section">Números de 2026</h2><div class="g4">${[['312','cursinhos'],['18.940','estudantes'],['1.204','voluntários'],['96 mil','simulados feitos']].map(s=>`<div class="card"><div class="stat">${s[0]}</div><div class="muted">${s[1]}</div></div>`).join('')}</div></div>`, v)}
+  ${S(o[3], `<div class="inner"><p class="eyebrow">Cursinhos</p><h2 class="h-section">Encontre um cursinho perto de você</h2><div class="g3">${['Cursinho Popular X · São Paulo','Educafro · Rio de Janeiro','Cursinho da Poli · São Paulo'].map(c=>`<div class="card"><b>${c.split(' · ')[0]}</b><div class="muted" style="margin-top:4px">${c.split(' · ')[1]}</div><div style="margin-top:12px"><span class="chip">Inscrições abertas</span></div></div>`).join('')}</div></div>`, v)}
+  ${S(o[4], `<div class="inner"><p class="eyebrow">Notícias</p><h2 class="h-section">O que está acontecendo</h2><div class="g3"><div class="card" style="grid-column:span 2;min-height:160px"><span class="chip">Novidade</span><h3 style="font-size:24px;margin-top:10px">Simulados do ENEM 2026 já estão disponíveis</h3><p class="muted" style="margin-top:8px">12 de novembro de 2026</p></div><div class="card"><b>Nova correção de redação</b><p class="muted" style="margin-top:6px">há 3 dias</p></div></div></div>`, v)}
+  ${S(o[5], `<div class="inner"><p class="eyebrow">Funcionalidades</p><h2 class="h-section">Tudo que o cursinho precisa</h2><div class="g3">${['Inscrições online','Simulados no formato ENEM','Controle de presença'].map(f=>`<div class="card"><b>${f}</b><p class="muted" style="margin-top:6px">Descrição curta da funcionalidade.</p></div>`).join('')}</div><div class="row" style="margin-top:28px"><button class="btn b-cta">Cadastrar meu cursinho</button></div></div>`, v)}
+  ${S(o[6], `<div class="inner"><p class="eyebrow">Mapa</p><h2 class="h-section">Cursinhos pelo Brasil</h2><div class="map">mapa (Leaflet)</div><div class="row" style="margin-top:20px"><button class="btn b-cta">Ver todos os cursinhos</button></div></div>`, v)}
+  ${S(o[7], `<div class="inner center"><p class="eyebrow">Quem acredita</p><h2 class="h-section">Nossos apoiadores</h2><div class="g4">${['Apoiador A','Apoiador B','Apoiador C','Apoiador D'].map(a=>`<div class="card" style="height:80px;display:grid;place-items:center" class="muted">${a}</div>`).join('')}</div></div>`, v)}
+  ${v.stripe?'<div class="stripe"></div>':''}
+  <div class="hdr" style="justify-content:center;font-size:13px;opacity:.9">© Você na Facul</div>`;
+  const site = document.getElementById('site'); site.className = 'site' + (mode==='mobile'?' mobile':''); site.innerHTML = html;
+  document.getElementById('vtitle').textContent = `Variant ${cur} — ${v.name}`;
+  document.getElementById('vdesc').innerHTML = '<ul>'+v.desc.map(d=>`<li>${d}</li>`).join('')+'</ul>';
+  document.getElementById('label').textContent = `${cur} — ${v.name}`;
+  document.querySelectorAll('.w').forEach(b=>b.classList.toggle('on', b.dataset.w===mode));
+  document.querySelectorAll('.h').forEach(b=>b.classList.toggle('on', b.dataset.h===hero));
+  document.getElementById('state').textContent = JSON.stringify({ variant:cur, name:v.name, mode, heroDesktopPx:+hero, sectionOrder:o, themes:v.themes, gradientStripe:v.stripe }, null, 2);
+}
+function setParam(k,val){ const u=new URL(location); u.searchParams.set(k,val); history.replaceState(null,'',u); }
+function go(d){ const ks=Object.keys(VARIANTS); cur=ks[(ks.indexOf(cur)+d+ks.length)%ks.length]; setParam('variant',cur); render(); }
+document.getElementById('prev').onclick=()=>go(-1);
+document.getElementById('next').onclick=()=>go(1);
+document.querySelectorAll('.w').forEach(b=>b.onclick=()=>{ mode=b.dataset.w; setParam('w',mode); render(); });
+document.querySelectorAll('.h').forEach(b=>b.onclick=()=>{ hero=b.dataset.h; setParam('hero',hero); render(); });
+addEventListener('keydown',e=>{ if(e.key==='ArrowLeft')go(-1); if(e.key==='ArrowRight')go(1); });
+render();
+</script>
+</body>
+</html>

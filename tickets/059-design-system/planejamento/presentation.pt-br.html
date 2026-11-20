@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Proposta de Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+<style>
+  /* The deck is styled with the proposed design system's own tokens. */
+  :root {
+    --background:#FFFFFF; --foreground:#0B2747; --page:#F7FAFF; --muted:#EBF1F8; --muted-foreground:#555B64;
+    --accent:#E8F2FE; --border:#DAE0E8; --input:#8B939D; --ring:#C55A00;
+    --primary:#0B2747; --primary-foreground:#FFFFFF; --cta:#B35300; --cta-foreground:#FFFFFF;
+    --destructive:#C5131D; --destructive-muted:#FFF8F7; --success:#006352; --success-muted:#EDFFF9;
+    --warning:#856500; --warning-muted:#FFF8CC; --info:#346CA3; --info-muted:#F6FBFF;
+    --mint:#37D6B5; --orange:#FF7600; --pink:#DA005A; --yellow:#FFE53C; --marine-800:#203A59; --marine-700:#364E6C; --marine-200:#D5E2F3;
+    --shadow-md: 0 4px 12px rgba(11,39,71,.10), 0 1px 3px rgba(11,39,71,.06);
+    --shadow-lg: 0 16px 40px rgba(11,39,71,.18), 0 2px 8px rgba(11,39,71,.08);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: #0f1b2b; font-family: Raleway, sans-serif; color: var(--foreground); }
+  h1, h2, h3, p, ul { margin: 0; }
+  ul { padding-left: 1.1em; }
+  li { margin: 4px 0; }
+
+  /* 1280×720 canvas scaled to the viewport */
+  #stage { position: fixed; inset: 0; display: grid; place-items: center; }
+  .slide { width: 1280px; height: 720px; background: var(--background); position: absolute; left: 50%; top: 50%; transform-origin: center; display: none; padding: 56px 72px 64px; overflow: hidden; }
+  .slide.on { display: block; }
+  .slide.dark { background: var(--foreground); color: #fff; }
+  .slide.page { background: var(--page); }
+  .stripe { position: absolute; left: 0; right: 0; top: 0; height: 6px; background: linear-gradient(to right, #37D6B5, #8CC408, #FFE53C, #FF7600, #DA005A); }
+  .foot { position: absolute; left: 72px; right: 72px; bottom: 22px; display: flex; justify-content: space-between; font-size: 12px; color: var(--muted-foreground); font-weight: 500; }
+  .dark .foot { color: var(--marine-200); }
+
+  .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--cta); }
+  .dark .eyebrow { color: var(--mint); }
+  .title { font-size: 40px; line-height: 1.12; font-weight: 800; letter-spacing: -.01em; margin-top: 8px; }
+  .lead { font-size: 19px; line-height: 1.6; color: var(--muted-foreground); margin-top: 14px; max-width: 980px; }
+  .dark .lead { color: var(--marine-200); }
+  .body { font-size: 16px; line-height: 1.55; }
+  .small { font-size: 14px; line-height: 1.5; }
+  .xs { font-size: 12px; line-height: 1.4; color: var(--muted-foreground); }
+  .muted { color: var(--muted-foreground); }
+  .mt8{margin-top:8px}.mt16{margin-top:16px}.mt24{margin-top:24px}.mt32{margin-top:32px}
+
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; }
+  .cols3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .cols4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 20px; }
+  .dark .card { background: var(--marine-800); border-color: var(--marine-700); color: #fff; }
+  .card h3 { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+  .big { font-size: 44px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; }
+  .big small { font-size: 18px; font-weight: 600; }
+
+  .btn { font-family: Raleway, sans-serif; font-size: 14px; font-weight: 600; height: 36px; padding: 0 16px; border-radius: 6px; border: 1px solid transparent; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .b-cta { background: var(--cta); color: #fff; } .b-primary { background: var(--primary); color: #fff; }
+  .b-secondary { background: var(--muted); color: var(--foreground); } .b-outline { background: #fff; color: var(--foreground); border-color: var(--input); }
+  .b-ghost { background: transparent; color: var(--foreground); } .b-destructive { background: var(--destructive); color: #fff; }
+  .b-link { background: transparent; color: var(--primary); text-decoration: underline; padding: 0 4px; }
+  .b-old { background: #FF7600; color: #fff; border: 2px solid #FF7600; font-weight: 700; }
+  .b-bright { background: var(--orange); color: var(--foreground); }
+  .focus { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--ring); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; height: 22px; padding: 0 9px; border-radius: 99px; white-space: nowrap; }
+  .dot { width: 7px; height: 7px; border-radius: 99px; display: inline-block; }
+  .pill { display: inline-block; font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 99px; }
+  .keep { background: var(--success-muted); color: var(--success); } .drop { background: var(--destructive-muted); color: var(--destructive); } .add { background: var(--info-muted); color: var(--info); }
+  .ratio { font-variant-numeric: tabular-nums; font-weight: 700; }
+  .pass { color: var(--success); } .fail { color: var(--destructive); }
+
+  table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+  table.t th { text-align: left; font-size: 12px; font-weight: 600; color: var(--muted-foreground); height: 32px; border-bottom: 1px solid var(--border); padding: 0 10px; }
+  table.t td { height: 34px; border-bottom: 1px solid var(--border); padding: 0 10px; vertical-align: middle; }
+
+  .sw { height: 40px; border-radius: 4px; }
+  .scale { display: grid; grid-template-columns: 70px repeat(11, 1fr); gap: 3px; align-items: center; font-size: 11px; font-weight: 600; }
+  .scale .sw.pin { outline: 2px solid var(--foreground); outline-offset: 1px; }
+
+  .field label { font-size: 13px; font-weight: 600; display: block; margin-bottom: 6px; }
+  .input { height: 36px; border: 1px solid var(--input); border-radius: 6px; padding: 0 12px; display: flex; align-items: center; font-size: 14px; background: #fff; }
+  .input.err { border-color: var(--destructive); }
+  .hint { font-size: 12px; font-weight: 500; color: var(--muted-foreground); margin-top: 6px; display: flex; gap: 6px; align-items: center; }
+
+  .timeline { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; }
+  .step { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px 10px 12px; min-height: 150px; }
+  .step b { display: block; font-size: 22px; font-weight: 800; color: var(--cta); }
+  .step span { font-size: 12.5px; line-height: 1.35; display: block; margin-top: 4px; font-weight: 600; }
+  .step i { font-style: normal; font-size: 11px; color: var(--muted-foreground); display: block; margin-top: 6px; line-height: 1.35; }
+
+  .layer { border-radius: 8px; padding: 14px 18px; font-size: 14px; }
+  .arrow { text-align: center; color: var(--muted-foreground); font-size: 18px; line-height: 1; margin: 6px 0; }
+  code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .88em; background: var(--muted); padding: 1px 5px; border-radius: 4px; }
+  .dark code { background: var(--marine-800); }
+
+  /* nav chrome */
+  #nav { position: fixed; bottom: 14px; right: 18px; display: flex; gap: 8px; align-items: center; color: #9fb0c6; font: 12px ui-sans-serif, system-ui; z-index: 10; }
+  #nav button { background: #1d2c40; color: #fff; border: 0; border-radius: 6px; height: 28px; min-width: 28px; cursor: pointer; font-size: 13px; }
+  #progress { position: fixed; left: 0; bottom: 0; height: 3px; background: var(--orange); transition: width .2s; z-index: 10; }
+
+  @media print {
+    @page { size: 1280px 720px; margin: 0; }
+    html, body { background: #fff; }
+    #stage { position: static; display: block; }
+    .slide { display: block !important; position: relative; left: 0; top: 0; transform: none !important; page-break-after: always; break-after: page; }
+    #nav, #progress { display: none; }
+  }
+</style>
+</head>
+<body>
+<div id="stage">
+
+<!-- 1 -->
+<section class="slide dark">
+  <div class="stripe"></div>
+  <div style="position:absolute;left:72px;top:190px;right:72px">
+    <p class="eyebrow">Proposta · client-vcnafacul · issue #343</p>
+    <h1 style="font-size:76px;line-height:1.04;font-weight:800;letter-spacing:-.01em;margin-top:18px">Você na Facul<br><span style="color:var(--mint)">Design System</span></h1>
+    <p class="lead" style="font-size:22px;margin-top:22px">Um só conjunto de tokens, uma só biblioteca de componentes, uma só migração.<br>O que estamos propondo e as decisões por trás disso.</p>
+    <div class="row" style="margin-top:34px"><span class="btn b-bright" style="height:44px;font-size:15px">Design system no código</span><span class="btn" style="height:44px;font-size:15px;border-color:#fff;color:#fff">14 decisões · 4 protótipos · 1 spec</span></div>
+  </div>
+  <div class="foot"><span>Outubro de 2026</span><span>wayfinder/343-design-system</span></div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <p class="eyebrow">Por quê</p>
+  <h2 class="title">Hoje a interface são quatro sistemas empilhados</h2>
+  <p class="lead">Cada tela escolhe o próprio botão, modal, cinza e azul. Nada segue a marca, e parte disso está quebrada de um jeito que o usuário já vê.</p>
+  <div class="cols4 mt32">
+    <div class="card"><div class="big">4</div><p class="small mt8"><b>camadas de UI:</b> shadcn (133 arquivos), MUI (63, azul padrão), PrimeReact (13, tema índigo) e o kit V1</p></div>
+    <div class="card"><div class="big">3</div><p class="small mt8"><b>sistemas de cor</b> misturados: ~1.900 classes da marca, ~1.970 padrões do Tailwind, ~330 hex soltos</p></div>
+    <div class="card"><div class="big" style="color:var(--destructive)">302</div><p class="small mt8"><b>classes de cor que não geram nada</b> (81 arquivos). Spinners não giram, skeletons não pulsam, gradientes sumiram</p></div>
+    <div class="card"><div class="big">3+</div><p class="small mt8"><b>implementações por componente.</b> Só de botão: V1, shadcn, MUI e 271 <code>&lt;button&gt;</code> soltos</p></div>
+  </div>
+  <div class="cols2 mt24">
+    <div class="card" style="display:flex;gap:18px;align-items:center"><span class="btn b-old" style="height:44px">Salvar</span><p class="small"><b>Nosso botão principal reprova no contraste:</b> branco sobre #FF7600 dá <span class="ratio fail">2,68:1</span> (o AA exige 4,5). Ele é usado 77 vezes.</p></div>
+    <div class="card"><p class="small"><b>O <code>ModalTemplate</code> (73 arquivos) não é um diálogo acessível:</b> sem <code>role="dialog"</code>, sem prender o foco e o Esc não fecha. 4 bibliotecas de ícones, toasts nas cores padrão da biblioteca, e o tema do shadcn ainda é o zinc de fábrica.</p></div>
+  </div>
+  <div class="foot"><span>Fonte: levantamento da UI no origin/develop</span><span>2</span></div>
+</section>
+
+<!-- 3 -->
+<section class="slide page">
+  <p class="eyebrow">A proposta</p>
+  <h2 class="title">Um design system no código, entregue em um único PR</h2>
+  <div class="cols3 mt32">
+    <div class="card"><h3>🎨 Tokens</h3><p class="small">Cores da marca, tipografia, espaçamento, arredondamento, sombras e camadas como <b>variáveis CSS + Tailwind</b>. Duas camadas: primitivos crus embaixo e nomes com significado (<code>primary</code>, <code>cta</code>, <code>success</code>…) em cima.</p></div>
+    <div class="card"><h3>🧩 Uma biblioteca de componentes</h3><p class="small"><b>shadcn/Radix + cva</b> em <code>components/ui</code>, com a cara da marca. MUI, PrimeReact, headlessui, o kit V1 e 3 bibliotecas de ícones saem.</p></div>
+    <div class="card"><h3>📚 Catálogo vivo + proteções</h3><p class="small"><b>Storybook</b> para todos os componentes, mais <b>testes de guarda</b> e <b>jsx-a11y</b> no CI para o código não voltar ao que era.</p></div>
+  </div>
+  <div class="cols2 mt24">
+    <div class="card"><h3>Dentro do escopo</h3><ul class="small"><li>Todas as telas: site público, área do estudante, painéis administrativos</li><li>Correções de acessibilidade (contraste, foco, diálogos, rótulos)</li><li>Comportamento no celular (áreas de toque, tabelas em cards, diálogos em tela cheia)</li><li>Guias de escrita e de acessibilidade</li></ul></div>
+    <div class="card"><h3>Fora do escopo</h3><ul class="small muted"><li>A biblioteca no Figma (pode espelhar a spec depois)</li><li>Valores do modo escuro (a estrutura já está pronta)</li><li>Unificar as bibliotecas de gráficos (só as cores entram)</li><li>Publicar o Storybook (depois, quando precisar)</li></ul></div>
+  </div>
+  <div class="foot"><span>O código é a fonte da verdade · os tokens do dashV2 são o ponto de partida</span><span>3</span></div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <p class="eyebrow">Como decidimos</p>
+  <h2 class="title">Um mapa wayfinder: 14 tickets, decididos um por vez</h2>
+  <p class="lead">Dois tickets de pesquisa levantaram os fatos. Sessões de perguntas fecharam a estrutura. Protótipos deixaram a gente reagir a pixels de verdade antes de decidir.</p>
+  <div class="cols2 mt24" style="gap:20px">
+    <table class="t"><tr><th>Ticket</th><th>Tipo</th></tr>
+      <tr><td>Levantamento da UI atual</td><td><span class="pill add">pesquisa</span></td></tr>
+      <tr><td>Opções de catálogo de componentes</td><td><span class="pill add">pesquisa</span></td></tr>
+      <tr><td>Quais bibliotecas de UI manter</td><td><span class="pill keep">perguntas</span></td></tr>
+      <tr><td>Como os tokens se organizam</td><td><span class="pill keep">perguntas</span></td></tr>
+      <tr><td>Paleta de cores</td><td><span class="pill" style="background:#FFF1E9;color:#B35300">protótipo</span></td></tr>
+      <tr><td>Escala tipográfica</td><td><span class="pill" style="background:#FFF1E9;color:#B35300">protótipo</span></td></tr>
+      <tr><td>Espaçamento, raios, sombras, breakpoints</td><td><span class="pill keep">perguntas</span></td></tr>
+    </table>
+    <table class="t"><tr><th>Ticket</th><th>Tipo</th></tr>
+      <tr><td>Catálogo permanente de componentes</td><td><span class="pill keep">perguntas</span></td></tr>
+      <tr><td>Onde fica e como se chama</td><td><span class="pill keep">perguntas</span></td></tr>
+      <tr><td>Componentes principais</td><td><span class="pill" style="background:#FFF1E9;color:#B35300">protótipo</span></td></tr>
+      <tr><td>Plano de migração</td><td><span class="pill keep">perguntas</span></td></tr>
+      <tr><td>Guias escritos</td><td><span class="pill keep">perguntas</span></td></tr>
+      <tr><td>Camada expressiva da home</td><td><span class="pill" style="background:#FFF1E9;color:#B35300">protótipo</span></td></tr>
+      <tr><td><b>Escrever a spec</b></td><td><span class="pill" style="background:var(--muted)">tarefa → spec.md</span></td></tr>
+    </table>
+  </div>
+  <div class="foot"><span>Todas as decisões, justificativas e opções descartadas: wayfinder/343-design-system/tickets/</span><span>4</span></div>
+</section>
+
+<!-- 5 -->
+<section class="slide page">
+  <p class="eyebrow">Bibliotecas</p>
+  <h2 class="title">Uma base só: shadcn/Radix + Tailwind + cva</h2>
+  <div class="cols2 mt32">
+    <div class="card">
+      <h3><span class="pill keep">mantém</span></h3>
+      <ul class="small">
+        <li><b>shadcn/Radix</b>: já está em 133 arquivos, tem primitivos acessíveis, e o dashV2 provou que dá para reestilizar</li>
+        <li><b>cva</b> para as variantes (o padrão do próprio shadcn)</li>
+        <li><b>lucide</b> como único conjunto de ícones, mais SVGs locais para marcas</li>
+        <li><b>react-toastify</b>, com o visual dos nossos tokens (nenhuma chamada muda)</li>
+        <li><b>react-day-picker</b> (já instalado) para o DatePicker</li>
+      </ul>
+      <h3 class="mt16"><span class="pill add">adiciona</span></h3>
+      <p class="small">Radix dropdown-menu, radio-group, switch, progress · <code>cmdk</code> (Combobox) · Storybook · eslint-plugin-jsx-a11y</p>
+    </div>
+    <div class="card">
+      <h3><span class="pill drop">sai</span></h3>
+      <table class="t">
+        <tr><td><b>MUI</b> (inclusive o DataGrid)</td><td class="muted">→ componentes do ui; DataGrid → <code>DataTable</code> ampliado</td></tr>
+        <tr><td><b>PrimeReact</b></td><td class="muted">→ DatePicker, Select</td></tr>
+        <tr><td><b>headlessui</b></td><td class="muted">→ DropdownMenu</td></tr>
+        <tr><td><b>kit V1</b> (Button, ModalTemplate, Text…)</td><td class="muted">→ ui; pastas atômicas congeladas</td></tr>
+        <tr><td><b>tailwind-variants</b></td><td class="muted">→ cva</td></tr>
+        <tr><td><b>react-icons, heroicons, radix-icons</b></td><td class="muted">→ lucide</td></tr>
+        <tr><td><b>react-loading-skeleton, react-spinners</b></td><td class="muted">→ Skeleton, Spinner</td></tr>
+      </table>
+      <p class="xs mt8">O @mui/material continua instalado só porque o @mui/x-charts depende dele. Limpar os gráficos é outro esforço.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Ticket: Quais bibliotecas de UI manter</span><span>5</span></div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <p class="eyebrow">Arquitetura de tokens</p>
+  <h2 class="title">Duas camadas, tudo em variáveis CSS</h2>
+  <div class="cols2 mt24" style="grid-template-columns:1.1fr 1fr;align-items:start">
+    <div>
+      <div class="layer" style="background:var(--muted)"><b>Componentes e telas</b><br><code>bg-primary</code> <code>text-muted-foreground</code> <code>border-input</code> <code>bg-success-muted</code></div>
+      <div class="arrow">↓ usam apenas</div>
+      <div class="layer" style="background:var(--accent)"><b>Tokens semânticos</b>: os nomes do shadcn, ampliados<br><code>--primary</code> <code>--cta</code> <code>--muted-foreground</code> <code>--success</code> <code>--warning</code> <code>--info</code> <code>--page</code> <code>--highlight</code></div>
+      <div class="arrow">↓ apontam para</div>
+      <div class="layer" style="background:#FFF1E9"><b>Primitivos</b>: só variáveis CSS, sem classes do Tailwind<br><code>--marine-900</code> <code>--orange-700</code> <code>--mint-400</code> … 8 matizes × 11 tons</div>
+    </div>
+    <div>
+      <ul class="body">
+        <li>Tudo fica em <code>src/styles/tokens.css</code>. O Tailwind só liga os nomes a <code>hsl(var(--x) / &lt;alpha&gt;)</code>.</li>
+        <li><b>Temas reapontam os mesmos tokens:</b> <code>[data-theme="marine"]</code> na home hoje, <code>.dark</code> no futuro. Os componentes não mudam.</li>
+        <li>Toasts, o seletor de datas e os gráficos leem as mesmas variáveis.</li>
+        <li>Nomes em inglês. Nomes semânticos <b>nunca citam uma cor</b> (nada de <code>--orange-button</code>).</li>
+        <li><b>A correção da fase 0</b> faz voltar as 302 classes mortas, os spinners e os gradientes.</li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Ticket: Como os tokens se organizam</span><span>6</span></div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <p class="eyebrow">Paleta de cores · guiada pela marca</p>
+  <h2 class="title">8 escalas, cada cor da marca exata no seu tom</h2>
+  <div class="mt24" id="scales"></div>
+  <p class="small muted mt16">Geradas em OKLCH. Amostra com contorno = a cor exata da marca, sem alteração. Os neutros puxam para o marine. As duplicatas (<code>green2</code>/<code>darkGreen</code>/<code>green3</code>, <code>red</code>/<code>redError</code>, cinco sistemas de cinza) e as 8 cores <code>logo*</code> saem.</p>
+  <div class="foot"><span>Ticket: Paleta de cores · protótipo: prototypes/color-palette.html</span><span>7</span></div>
+</section>
+
+<!-- 8 -->
+<section class="slide page">
+  <p class="eyebrow">Cores semânticas</p>
+  <h2 class="title">Significado, não cor. Todo par de texto passa no AA</h2>
+  <div class="cols2 mt24" style="grid-template-columns:1fr 1.05fr">
+    <div class="card">
+      <h3>Botões</h3>
+      <div class="row"><span class="btn b-old">Antes</span><span class="ratio fail">2,68:1 ✗</span></div>
+      <div class="row mt8"><span class="btn b-cta">+ Nova prova</span><span class="small"><b>cta</b> · branco sobre #B35300 · <span class="ratio pass">5,06:1 ✓</span></span></div>
+      <div class="row mt8"><span class="btn b-primary">Salvar</span><span class="small"><b>primary</b> · marine · <span class="ratio pass">15:1 ✓</span></span></div>
+      <p class="xs mt16"><b>No máximo um <code>cta</code> por tela.</b> O #FF7600 vivo continua nos gráficos, nas ilustrações e nas seções escuras da home (com texto marine).</p>
+      <h3 class="mt16">Texto e bordas</h3>
+      <p class="small"><code>foreground</code> marine · <code>muted-foreground</code> #555B64 (6,8:1, a única cor de texto secundário) · bordas <code>input</code> 3,1:1 · anel de foco laranja sólido 4,3:1</p>
+    </div>
+    <div class="card">
+      <h3>Status</h3>
+      <table class="t">
+        <tr><th>Token</th><th>Cor</th><th>Ponto (tabelas)</th><th>Tinta (alertas)</th></tr>
+        <tr><td><b>success</b></td><td class="small">mint-700</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--success)"></span>Concluída</span></td><td><span class="badge" style="background:var(--success-muted);color:var(--success)"><span class="dot" style="background:var(--success)"></span>Concluída</span></td></tr>
+        <tr><td><b>warning</b></td><td class="small">amarelo dourado 600</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--warning)"></span>Em andamento</span></td><td><span class="badge" style="background:var(--warning-muted);color:var(--warning)"><span class="dot" style="background:var(--warning)"></span>Em andamento</span></td></tr>
+        <tr><td><b>destructive</b></td><td class="small">vermelho da marca 600</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--destructive)"></span>Faltando</span></td><td><span class="badge" style="background:var(--destructive-muted);color:var(--destructive)"><span class="dot" style="background:var(--destructive)"></span>Faltando</span></td></tr>
+        <tr><td><b>info</b></td><td class="small">blueGeo 600</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--info)"></span>Agendada</span></td><td><span class="badge" style="background:var(--info-muted);color:var(--info)"><span class="dot" style="background:var(--info)"></span>Agendada</span></td></tr>
+      </table>
+      <p class="xs mt16"><b>Pontos em tabelas e listas</b>, para 50 linhas não virarem um arco-íris. <b>Tinta</b> em alertas e badges avulsos. Todas as séries de gráfico têm ≥ 3:1.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Ticket: Paleta de cores</span><span>8</span></div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <p class="eyebrow">Tipografia · Raleway</p>
+  <h2 class="title">Duas densidades: 14px na interface, 16–17px na leitura</h2>
+  <div class="cols2 mt24" style="grid-template-columns:1.25fr 1fr;align-items:start">
+    <table class="t">
+      <tr><th>Passo</th><th>Celular → desktop</th><th>Exemplo</th></tr>
+      <tr><td><code>hero</code></td><td class="small">48 → 72 → 96</td><td style="font-size:30px;font-weight:800;line-height:1.1">Educação popular</td></tr>
+      <tr><td><code>display</code></td><td class="small">30 → 48</td><td style="font-size:24px;font-weight:800">Nossos apoiadores</td></tr>
+      <tr><td><code>h1</code> / <code>h2</code></td><td class="small">24→30 / 20→24</td><td style="font-size:22px;font-weight:700">Banco de provas</td></tr>
+      <tr><td><code>h3</code> / <code>h4</code></td><td class="small">16→18 / 14→16</td><td style="font-size:17px;font-weight:600">Nova prova</td></tr>
+      <tr><td><code>prose</code></td><td class="small">16 → 17 · entrelinha 1,7</td><td style="font-size:16px;line-height:1.5">Leia o texto e responda…</td></tr>
+      <tr><td><code>body</code> / <code>body-sm</code></td><td class="small">14 / 13</td><td style="font-size:14px">Os alunos podem refazer o simulado.</td></tr>
+      <tr><td><code>caption</code> / <code>label</code></td><td class="small">12 / 13</td><td style="font-size:12px;font-weight:500">68% da meta · <b style="font-size:13px">Nome da prova</b></td></tr>
+      <tr><td><code>overline</code></td><td class="small">12 · caixa alta</td><td><span class="eyebrow" style="font-size:12px">Para estudantes</span></td></tr>
+    </table>
+    <ul class="body">
+      <li><b>Uma classe por passo</b> (<code>text-h1</code>) reúne tamanho, entrelinha e peso, e troca para o tamanho de desktop a partir de 768px.</li>
+      <li><b>Mínimo de 12px.</b> Os 23 usos abaixo disso sobem.</li>
+      <li>Estudantes leem textos do ENEM no celular, então ganham o <code>prose</code>. Quem administra e varre tabelas mantém a densidade de 14px.</li>
+      <li>Pesos 400 a 800 mais itálico: <b>6 arquivos de fonte em vez de 10</b>. O 800 que a home sempre quis finalmente carrega.</li>
+      <li>Sem componente <code>Text</code>: tags semânticas + classes. O <code>Text</code> do V1 renderizava uma <code>&lt;div&gt;</code>.</li>
+    </ul>
+  </div>
+  <div class="foot"><span>Tickets: Escala tipográfica · Camada expressiva · protótipo: prototypes/type-scale.html</span><span>9</span></div>
+</section>
+
+<!-- 10 -->
+<section class="slide page">
+  <p class="eyebrow">Espaçamento · arredondamento · elevação · layout</p>
+  <h2 class="title">Oficializar o que o código já faz</h2>
+  <div class="cols3 mt24">
+    <div class="card"><h3>Espaçamento</h3><p class="small">Mantém a escala de 4px do Tailwind. Componentes usam <b>2–32px</b>, o layout <b>40–96px</b>. <code>p-[48px]</code> arbitrário fica proibido.</p>
+      <div class="row mt16" style="align-items:flex-end;gap:6px"><span style="width:8px;height:8px;background:var(--cta)"></span><span style="width:12px;height:12px;background:var(--cta)"></span><span style="width:16px;height:16px;background:var(--cta)"></span><span style="width:24px;height:24px;background:var(--cta)"></span><span style="width:32px;height:32px;background:var(--cta)"></span></div></div>
+    <div class="card"><h3>Raios: uma função cada</h3>
+      <div class="row"><span class="btn b-outline" style="border-radius:4px;height:30px">4 · chips</span><span class="btn b-outline" style="border-radius:6px;height:30px">6 · controles</span></div>
+      <div class="row mt8"><span class="btn b-outline" style="border-radius:8px;height:30px">8 · cards</span><span class="btn b-outline" style="border-radius:12px;height:30px">12 · diálogos</span><span class="btn b-outline" style="border-radius:99px;height:30px">pílulas</span></div></div>
+    <div class="card"><h3>Bordas, não sombras</h3><p class="small">Superfícies dentro da página ganham borda de 1px. <b>Sombra só para o que flutua</b> (menus, toasts, diálogos), em 3 níveis tingidos de marine.</p>
+      <div class="row mt16"><span class="card" style="padding:8px 12px;font-size:12px">card</span><span class="card" style="padding:8px 12px;font-size:12px;box-shadow:var(--shadow-md)">menu</span><span class="card" style="padding:8px 12px;font-size:12px;box-shadow:var(--shadow-lg)">diálogo</span></div></div>
+  </div>
+  <div class="cols3 mt16">
+    <div class="card"><h3>Breakpoints continuam</h3><p class="small"><code>sm 768</code> divide celular e desktop · <code>md 1200</code> é o desktop cheio. Trocar reescreveria ~960 classes. Atenção: o nosso <code>sm</code> é o <code>md</code> do Tailwind.</p></div>
+    <div class="card"><h3>Tokens de layout</h3><p class="small">Margens laterais 16/24/32 · larguras <code>prose-content</code> 720, <code>form</code> 560, <code>page</code> 1200 · <code>size</code> do Dialog 400/560/800 · <code>--header-h</code> substitui 17 números mágicos</p></div>
+    <div class="card"><h3>Camadas de z-index com nome</h3><p class="small">base · raised · sticky · header · overlay · <b>popover acima dos diálogos</b> · toast. Chega de <code>z-[1400]</code>.</p></div>
+  </div>
+  <div class="foot"><span>Ticket: Espaçamento, raios, sombras e breakpoints</span><span>10</span></div>
+</section>
+
+<!-- 11 -->
+<section class="slide">
+  <p class="eyebrow">Componentes</p>
+  <h2 class="title">~30 componentes em <code style="font-size:.8em">components/ui</code>, todos os estados desenhados</h2>
+  <div class="cols2 mt24" style="grid-template-columns:1.15fr 1fr;align-items:start">
+    <div>
+      <div class="row"><span class="btn b-cta">+ Nova prova</span><span class="btn b-primary">Salvar</span><span class="btn b-secondary">Duplicar</span><span class="btn b-outline">Filtros</span><span class="btn b-ghost">Cancelar</span><span class="btn b-destructive">Excluir</span><span class="btn b-link">Ver detalhes</span></div>
+      <div class="row mt8"><span class="btn b-primary focus">foco</span><span class="btn b-primary" style="opacity:.5">desativado</span><span class="btn b-primary" style="opacity:.85">⟳ carregando</span></div>
+      <div class="cols2 mt24" style="gap:16px">
+        <div class="field"><label>Nome da prova <span style="color:var(--destructive)">*</span></label><div class="input focus">ENEM 2025</div><div class="hint">Aparece para os alunos.</div></div>
+        <div class="field"><label>Ano <span style="color:var(--destructive)">*</span></label><div class="input err">20255</div><div class="hint"><span style="color:var(--destructive);font-weight:700">⊗</span>Ano deve ter 4 dígitos.</div></div>
+      </div>
+      <div class="card mt16" style="display:flex;gap:12px;align-items:center;box-shadow:var(--shadow-md);max-width:380px"><span style="color:var(--destructive);font-weight:800">⊗</span><div><b class="small">Não foi possível salvar a prova.</b><div class="xs">Verifique sua conexão e tente de novo.</div></div><span class="muted" style="margin-left:auto">×</span></div>
+    </div>
+    <div>
+      <ul class="small">
+        <li><b>Button</b>: 7 variantes × 6 estados; só ícone exige <code>aria-label</code></li>
+        <li><b>Field</b>: rótulo · controle · dica ou erro, <b>asterisco vermelho</b> nos obrigatórios</li>
+        <li>Input, Select, <b>Combobox</b>, Checkbox, Radio, Switch, <b>DatePicker</b>, DateRangePicker</li>
+        <li><b>DataTable</b>: seleção, ordenação e paginação no servidor, badges de ponto, cards no celular</li>
+        <li>Dialog (tamanhos), AlertDialog (diz a ação), Sheet</li>
+        <li>DropdownMenu, Popover, Tooltip · <b>abas sublinhadas</b>, só esse estilo</li>
+        <li>StatusBadge (ponto/tinta), Badge, Alert, <b>Toast</b> (erros ficam até fechar)</li>
+        <li>Card, Pagination, Skeleton, Spinner, Progress, Accordion, Sidebar</li>
+      </ul>
+      <p class="xs mt16">Cada um ganha stories no Storybook para todas as variantes e estados.</p>
+    </div>
+  </div>
+  <div class="foot"><span>Ticket: Componentes principais · protótipo: prototypes/components.html</span><span>11</span></div>
+</section>
+
+<!-- 12 -->
+<section class="slide page">
+  <p class="eyebrow">Densidade adaptativa</p>
+  <h2 class="title">Compacto na mesa, confortável no celular</h2>
+  <div class="cols2 mt24" style="grid-template-columns:1.5fr 1fr;align-items:start">
+    <div class="card" style="padding:0;overflow:hidden">
+      <div class="row" style="padding:10px 12px;border-bottom:1px solid var(--border)"><div class="input" style="flex:1;height:32px;color:var(--muted-foreground)">Buscar prova…</div><span class="btn b-outline" style="height:32px">Filtros</span><span class="btn b-cta" style="height:32px">+ Nova prova</span></div>
+      <table class="t" style="font-size:13px"><tr><th></th><th>Prova ↓</th><th>Ano</th><th style="text-align:right">Questões</th><th>Status</th></tr>
+        <tr style="background:var(--accent)"><td>☑</td><td>ENEM 2019 — 1ª aplicação</td><td class="muted">2019</td><td style="text-align:right" class="muted">180/180</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--success)"></span>Concluída</span></td></tr>
+        <tr><td>☐</td><td>FUVEST 2024</td><td class="muted">2024</td><td style="text-align:right" class="muted">90/90</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--warning)"></span>Em andamento</span></td></tr>
+        <tr><td>☐</td><td>Simulado Nacional 3</td><td class="muted">2026</td><td style="text-align:right" class="muted">0/45</td><td><span class="badge" style="background:var(--muted)"><span class="dot" style="background:var(--info)"></span>Agendada</span></td></tr>
+      </table>
+      <p class="xs" style="padding:8px 12px">Desktop: controles de 36px, linhas de 40px (a densidade atual do dashV2)</p>
+    </div>
+    <div style="display:flex;gap:16px;align-items:flex-start">
+      <div style="width:200px;border:6px solid var(--foreground);border-radius:22px;padding:10px 8px;background:#fff">
+        <div class="xs" style="font-weight:700;color:var(--foreground);margin-bottom:6px">Celular · cards</div>
+        <div style="border-bottom:1px solid var(--border);padding:6px 2px;background:var(--accent)"><b style="font-size:12px">☑ ENEM 2019 — 1ª apl.</b><div class="xs">2019 · 180/180</div><span class="badge" style="background:var(--muted);height:18px;font-size:10px"><span class="dot" style="background:var(--success)"></span>Concluída</span></div>
+        <div style="border-bottom:1px solid var(--border);padding:6px 2px"><b style="font-size:12px">☐ FUVEST 2024</b><div class="xs">2024 · 90/90</div><span class="badge" style="background:var(--muted);height:18px;font-size:10px"><span class="dot" style="background:var(--warning)"></span>Em andamento</span></div>
+        <div style="margin-top:8px;height:34px;border-radius:6px;background:var(--primary);color:#fff;font-size:12px;font-weight:600;display:grid;place-items:center">Criar prova</div>
+      </div>
+      <ul class="small" style="flex:1"><li><b>Áreas de toque de 44px</b> no celular</li><li><b>Tabelas viram cards</b>. Cada coluna diz seu papel, com padrões razoáveis</li><li><b>Diálogos em tela cheia</b>, ação principal em cima</li><li>Os menus abrem como <b>Sheet à esquerda</b></li></ul>
+    </div>
+  </div>
+  <div class="foot"><span>Ticket: Componentes principais (variante C, “Adaptativa”)</span><span>12</span></div>
+</section>
+
+<!-- 13 -->
+<section class="slide dark" style="padding:0">
+  <div class="stripe"></div>
+  <div style="padding:64px 72px 0">
+    <p class="eyebrow">Home · camada expressiva</p>
+    <h2 style="font-size:64px;line-height:1.05;font-weight:800;letter-spacing:-.01em;margin-top:12px">Educação popular, <span style="color:var(--mint)">digital e gratuita</span></h2>
+    <p class="lead" style="font-size:18px">Os mesmos tokens, reapontados dentro de <code>[data-theme="marine"]</code>. O hero mantém o título de 48 → 72 → 96px que foi desenhado (<code>text-hero</code>).</p>
+    <div class="row" style="margin-top:22px"><span class="btn b-bright" style="height:44px;font-size:15px">Quero participar</span><span class="btn" style="height:44px;font-size:15px;background:#fff;color:var(--foreground)">Conhecer a plataforma</span></div>
+    <div class="cols3" style="margin-top:36px">
+      <div class="card"><h3>CTA vivo sobre o marine</h3><p class="small" style="color:var(--marine-200)">Nas seções escuras, o <code>cta</code> vira #FF7600 com texto marine (5,62:1). É o momento mais forte da marca, e passa no AA.</p></div>
+      <div class="card"><h3>Marine · branco · amarelo</h3><p class="small" style="color:var(--marine-200)">O ritmo atual das seções continua. Os temas rosa e verde, que ninguém usa, saem. Um novo token <code>highlight</code> colore os sobretítulos.</p></div>
+      <div class="card"><h3>Arco-íris → faixa da marca</h3><p class="small" style="color:var(--marine-200)">O gradiente vira uma faixa de 4px abaixo do cabeçalho e acima do rodapé, como neste slide.</p></div>
+    </div>
+  </div>
+  <div class="foot"><span>Ticket: Camada expressiva · protótipo: prototypes/home-expressive.html</span><span>13</span></div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <p class="eyebrow">Guias</p>
+  <h2 class="title">Como escrevemos, e como tudo precisa funcionar para todos</h2>
+  <div class="cols4 mt24" style="gap:14px">
+    <div class="card"><h3>✍️ Tom de voz</h3><ul class="small"><li>Próximo, com <b>“você”</b></li><li><b>Só a primeira letra maiúscula</b></li><li>Botões: <b>verbo + objeto</b> (“Excluir prova”, nunca “OK”)</li><li>“!” só para comemorar</li><li>Datas e números no formato brasileiro</li></ul></div>
+    <div class="card"><h3>⚠️ Erros</h3><ul class="small"><li><b>O que aconteceu + o que fazer</b></li><li>Erro de campo <b>embaixo do campo</b>, nunca em toast</li><li>Erro que trava a tela: Alert na página + tentar de novo</li><li>Sem códigos, sem culpar o usuário</li></ul></div>
+    <div class="card"><h3>♿ Acessibilidade</h3><ul class="small"><li>Contraste AA, mínimo de 12px, foco visível</li><li>Títulos em ordem, controles com rótulo</li><li>Nada de div clicável</li><li>Respeita quem prefere menos movimento</li><li><b>jsx-a11y no CI</b></li></ul></div>
+    <div class="card"><h3>📱 Celular</h3><ul class="small"><li>Áreas de toque de 44px</li><li>Formulário em uma coluna, barra de ação fixa</li><li>O teclado certo (<code>inputMode</code>)</li><li>Nada que dependa de passar o mouse</li></ul></div>
+  </div>
+  <div class="card mt16" style="background:var(--page)"><p class="small"><b>As regras de uso numa página só:</b> um <code>cta</code> por tela · bordas vs sombras · badge de ponto vs tinta · <code>prose</code> vs <code>body</code> · uma só cor de texto secundário · asterisco nos obrigatórios · toast de erro fica na tela · só abas sublinhadas · mínimo de 12px.</p></div>
+  <div class="foot"><span>Ticket: Guias escritos · ficam como páginas MDX no Storybook</span><span>14</span></div>
+</section>
+
+<!-- 15 -->
+<section class="slide page">
+  <p class="eyebrow">Catálogo e proteções</p>
+  <h2 class="title">Storybook para ver, testes para manter</h2>
+  <div class="cols3 mt24">
+    <div class="card"><h3>📚 Storybook 10.6</h3><ul class="small"><li>Todo componente do <code>ui</code> tem story para cada variante e estado (obrigatório)</li><li>Autodocs, controles, <b>painel axe</b></li><li>Barras: 390/768/1200 e <code>data-theme</code></li><li>MDX: fundamentos + guias</li><li>A vitrine continua para as telas de funcionalidade</li></ul></div>
+    <div class="card"><h3>🛡️ Teste de guarda</h3><ul class="small"><li>Sem cores ou tamanhos antigos</li><li>Sem <code>[#hex]</code>, <code>[Npx]</code> ou <code>z-[N]</code> arbitrários</li><li>Sem imports proibidos (MUI, PrimeReact…)</li><li>Nenhum arquivo novo nas pastas atômicas</li><li>Nenhum componente sem stories</li><li><b>Zero tolerância a partir do merge</b></li></ul></div>
+    <div class="card"><h3>✅ Também no CI</h3><ul class="small"><li><b>Teste de contraste</b>: todo par de tokens conferido com a conta do WCAG</li><li>Stories renderizadas como testes rápidos</li><li><code>build-storybook</code> quando o design system muda</li><li><b>ESLint consertado</b> (hoje quebrado no develop) + jsx-a11y</li></ul></div>
+  </div>
+  <div class="card mt16"><p class="small"><b>Onde fica:</b> <code>components/ui</code> (componentes + stories) · <code>styles/tokens.css</code> · <code>tailwind/type-scale.js</code> · <code>lib/palette.ts</code> · <code>design-system/</code> (guardas, teste de contraste, docs) · <code>.storybook/</code>. A tabela e o badge do dashV2 vão para o <code>ui</code>, e o template de listas fica onde está, usando o design system.</p></div>
+  <div class="foot"><span>Tickets: Catálogo permanente de componentes · Onde fica e como se chama</span><span>15</span></div>
+</section>
+
+<!-- 16 -->
+<section class="slide">
+  <p class="eyebrow">Migração</p>
+  <h2 class="title">Um PR, dez commits em ordem, cada um passando</h2>
+  <p class="lead" style="font-size:17px">~519 de 1.327 arquivos. Merge sem squash, para que qualquer passo possa ser localizado com bisect ou revertido sozinho. Rebase diário, os codemods rodam de novo, e um congelamento de UI de 2–3 dias para o QA final.</p>
+  <div class="timeline mt24">
+    <div class="step"><b>1</b><span>Correção da fase 0</span><i>Voltam as classes mortas, os spinners e os gradientes</i></div>
+    <div class="step"><b>2</b><span>Tokens</span><i>tokens.css, mapa do Tailwind, plugin de tipografia, fontes</i></div>
+    <div class="step"><b>3</b><span>Lint e guardas</span><i>ESLint consertado, jsx-a11y, guarda (catraca), contraste</i></div>
+    <div class="step"><b>4</b><span>Storybook</span><i>configuração + docs MDX</i></div>
+    <div class="step"><b>5</b><span>Componentes do ui</span><i>com stories; DataTable vem do dashV2</i></div>
+    <div class="step"><b>6</b><span>Varreduras com codemod</span><i>cores, tamanhos, raios/z, ícones, um commit cada</i></div>
+    <div class="step"><b>7</b><span>Famílias de componentes</span><i>Button, modais, MUI, cada tela com DataGrid…</i></div>
+    <div class="step"><b>8</b><span>Divisão do dashV2</span><i>template sobre o ui, tokens.ts removido</i></div>
+    <div class="step"><b>9</b><span>Camada da home</span><i>temas, hero, faixa</i></div>
+    <div class="step"><b>10</b><span>Limpeza</span><i>V1 apagado, dependências removidas, guarda em zero</i></div>
+  </div>
+  <div class="cols3 mt16">
+    <div class="card"><h3>Codemods</h3><p class="small">Uma <b>tabela de mapeamento</b> (classe antiga → token) fica na spec. Casos ambíguos ganham <code>/* ds-review */</code> e são resolvidos à mão. O CI falha enquanto sobrar algum.</p></div>
+    <div class="card"><h3>Verificação</h3><p class="small">CI · <b>capturas de antes e depois de todos os estados da vitrine</b> em 390 e 1280 · um <b>checklist em homologação</b> com os fluxos principais de estudante, admin e público.</p></div>
+    <div class="card"><h3>Regra de escopo</h3><p class="small"><b>Paridade + as melhorias já decididas, só isso.</b> Bugs encontrados viram issue, não correção. Testes são adaptados, nunca apagados. Para voltar atrás: reverter um passo ou o merge.</p></div>
+  </div>
+  <div class="foot"><span>Ticket: Plano de migração</span><span>16</span></div>
+</section>
+
+<!-- 17 -->
+<section class="slide page">
+  <p class="eyebrow">Riscos</p>
+  <h2 class="title">O que pode dar errado, e o que fazemos a respeito</h2>
+  <table class="t mt24" style="font-size:15px">
+    <tr><th style="width:34%">Risco</th><th>Como mitigar</th></tr>
+    <tr><td><b>Um PR de 519 arquivos não dá para revisar linha a linha</b></td><td>Um tema por commit, codemods revisados como padrão, <b>comparação de capturas de tela</b> em vez de diff de classes, casos ambíguos marcados</td></tr>
+    <tr><td><b>A branch fica desatualizada</b> (~12 commits/dia no develop)</td><td>Rebase diário, as varreduras são scripts que rodam de novo, congelamento curto só no fim</td></tr>
+    <tr><td><b>Regressões de comportamento</b> (DataGrid → DataTable, modais → Radix)</td><td>Um commit por tela com DataGrid, testes existentes adaptados mantendo as verificações, fluxos ★ do checklist de homologação</td></tr>
+    <tr><td><b>Usuários percebem que toda tela mudou</b></td><td>As mudanças são de propósito (contraste, foco, celular); um aviso de “o que mudou” para quem coordena os cursinhos</td></tr>
+    <tr><td><b>Algo quebra em produção</b></td><td>Merge commit: <code>git revert</code> de um passo ou do merge inteiro</td></tr>
+    <tr><td><b>O código voltar a se desviar depois do merge</b></td><td>Guarda em zero, jsx-a11y como erro, stories obrigatórias, teste de contraste</td></tr>
+  </table>
+  <div class="foot"><span>Ticket: Plano de migração</span><span>17</span></div>
+</section>
+
+<!-- 18 -->
+<section class="slide dark">
+  <div class="stripe"></div>
+  <p class="eyebrow">Próximos passos</p>
+  <h2 class="title">O que precisamos para seguir</h2>
+  <div class="cols2 mt32">
+    <div>
+      <ol class="body" style="padding-left:1.2em">
+        <li><b>Concordar com a proposta</b>, ou apontar a decisão a rever (cada ticket lista as opções descartadas)</li>
+        <li class="mt8"><b>Agendar a construção</b>: uma branch, montada passo a passo a partir do <code>spec.md</code></li>
+        <li class="mt8"><b>Escolher a janela de congelamento</b> (2–3 dias) para o QA final e o merge</li>
+        <li class="mt8"><b>Passar em homologação</b> com o checklist: estudante, admin, público</li>
+        <li class="mt8"><b>Publicar</b> com um aviso de “o que mudou”</li>
+      </ol>
+    </div>
+    <div class="card">
+      <h3>Referências</h3>
+      <ul class="small" style="color:var(--marine-200)">
+        <li><code>wayfinder/343-design-system/spec.md</code>: a spec de implementação (em inglês)</li>
+        <li><code>map.md</code>: índice das decisões</li>
+        <li><code>tickets/</code>: justificativas e opções descartadas</li>
+        <li><code>prototypes/color-palette.html?variant=A</code></li>
+        <li><code>prototypes/type-scale.html?variant=C</code></li>
+        <li><code>prototypes/components.html?variant=C</code></li>
+        <li><code>prototypes/home-expressive.html?variant=A&amp;hero=96</code></li>
+      </ul>
+    </div>
+  </div>
+  <div class="foot"><span>Você na Facul · Proposta de Design System</span><span>18</span></div>
+</section>
+
+</div>
+
+<div id="nav"><button id="prev" aria-label="Slide anterior">‹</button><span id="count"></span><button id="next" aria-label="Próximo slide">›</button><button id="fs" aria-label="Tela cheia" title="Tela cheia (F)">⛶</button></div>
+<div id="progress"></div>
+
+<script>
+  // scales for slide 7
+  const SC = {
+    marine:['#F7FAFF','#E8F2FE','#D5E2F3','#B2C2D7','#8699B0','#677C96','#4D6480','#364E6C','#203A59','#0B2747','#04101F',9],
+    orange:['#FFF9F5','#FFF1E9','#FFE3D4','#FFC5A7','#FF9A62','#FF7600','#C55A00','#B35300','#662B00','#3E1700','#1F0800',5],
+    pink:['#FFF8F9','#FFEDEF','#FFDADF','#FFB0BC','#FE6E8E','#ED4472','#DA005A','#A50042','#73002C','#480018','#260009',6],
+    mint:['#EDFFF9','#D5FFF2','#AAFEE7','#79EED1','#37D6B5','#00AB8E','#00846E','#006352','#004438','#002921','#00140F',4],
+    yellow:['#FFFBE3','#FFF8CC','#FFF2A6','#FFE53C','#CCAC00','#A78600','#856500','#674A00','#4A3200','#301C00','#1A0C00',3],
+    red:['#FFF8F7','#FFEDEB','#FFDAD5','#FFB0A7','#FF6E64','#F43535','#C5131D','#99000F','#6D0007','#460003','#270001',5],
+    blue:['#F6FBFF','#E8F3FF','#D0E7FF','#9DCCFC','#6FA6DF','#4D8CCB','#346CA3','#205181','#0B3860','#002141','#001024',5],
+    neutral:['#F7FAFF','#EBF1F8','#DAE0E8','#B7BEC7','#8B939D','#6D757F','#555B64','#40464D','#2C3137','#1A1E24','#0C1014',-1],
+  };
+  const ST = [50,100,200,300,400,500,600,700,800,900,950];
+  document.getElementById('scales').innerHTML =
+    `<div class="scale"><span></span>${ST.map(s=>`<span class="xs" style="text-align:center">${s}</span>`).join('')}</div>` +
+    Object.entries(SC).map(([h,v]) => `<div class="scale" style="margin-top:4px"><span>${h}</span>${v.slice(0,11).map((c,i)=>`<div class="sw ${i===v[11]||(h==='orange'&&i===7)?'pin':''}" style="background:${c}" title="${h}-${ST[i]} ${c}"></div>`).join('')}</div>`).join('');
+
+  // deck navigation
+  const slides = [...document.querySelectorAll('.slide')];
+  let i = Math.max(0, Math.min(slides.length - 1, (parseInt(location.hash.slice(1)) || 1) - 1));
+  function fit() { const s = Math.min(innerWidth / 1280, innerHeight / 720); slides.forEach(el => el.style.transform = `translate(-50%,-50%) scale(${s})`); }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach((el, k) => el.classList.toggle('on', k === i));
+    document.getElementById('count').textContent = `${i + 1} / ${slides.length}`;
+    document.getElementById('progress').style.width = `${(i + 1) / slides.length * 100}%`;
+    history.replaceState(null, '', '#' + (i + 1));
+  }
+  addEventListener('keydown', e => {
+    if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key)) { e.preventDefault(); show(i + 1); }
+    if (['ArrowLeft', 'PageUp', 'Backspace'].includes(e.key)) { e.preventDefault(); show(i - 1); }
+    if (e.key === 'Home') show(0);
+    if (e.key === 'End') show(slides.length - 1);
+    if (e.key === 'f' || e.key === 'F') toggleFs();
+  });
+  function toggleFs() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen?.(); }
+  document.getElementById('prev').onclick = () => show(i - 1);
+  document.getElementById('next').onclick = () => show(i + 1);
+  document.getElementById('fs').onclick = toggleFs;
+  addEventListener('resize', fit);
+  fit(); show(i);
+</script>
+</body>
+</html>
