@@ -247,7 +247,7 @@ Every primitive carries its hex in a comment. The values were generated in OKLCH
   --orange-400: 21 100% 69%;        /* #FF9A62 */
   --orange-500: 28 100% 50%;        /* #FF7600 */
   --orange-600: 27 100% 39%;        /* #C55A00 */
-  --orange-700: 28 100% 35%;        /* #B35300 */
+  --orange-700: 28 100% 34%;        /* #AD5100 */
   --orange-800: 25 100% 20%;        /* #662B00 */
   --orange-900: 22 100% 12%;        /* #3E1700 */
   --orange-950: 15 100% 6%;         /* #1F0800 */
@@ -342,7 +342,7 @@ Every primitive carries its hex in a comment. The values were generated in OKLCH
   --accent: var(--marine-100);              /* hover/highlight background in menus, rows */
   --accent-foreground: var(--marine-900);
 
-  --cta: var(--orange-700);                 /* #B35300 — at most one per screen */
+  --cta: var(--orange-700);                 /* #AD5100 — at most one per screen */
   --cta-foreground: 0 0% 100%;
   --highlight: var(--orange-700);           /* eyebrows + highlighted words (home) */
 
@@ -406,12 +406,20 @@ Every primitive carries its hex in a comment. The values were generated in OKLCH
   --background: var(--yellow-50);
   --border: var(--yellow-100);
   --highlight: var(--yellow-700);
+  --input: var(--neutral-500);              /* neutral-400 is 2.99:1 on yellow-50 */
 }
 ```
 
 The old `.dark` block in `index.css` is removed. Dark values are out of scope, but the structure allows a `.dark { … }` later. Also removed: the shadcn zinc `:root` block and `src/styles/sectionThemes.css` (its `--section-*` variables and `.home-section__eyebrow`). Section components read semantic tokens instead.
 
-Contrast of every semantic pair (all pass): see the palette prototype §3. The contrast test (§5.3) re-checks them on every CI run.
+Contrast of every semantic pair: see the palette prototype §3. The contrast test (§5.3) re-checks them on every CI run.
+
+> **Revisto na implementação (R12, 2026-11-23).** O protótipo arredondava alguns pares para cima. Dois foram
+> corrigidos no token: `orange-700` passou de `#B35300` para `#AD5100` (`highlight` sobre `muted` estava em
+> 4,48:1) e o tema `yellow` ganhou `--input: neutral-500` (`neutral-400` ficava em 2,99:1 sobre `yellow-50`).
+> No tema `marine`, os tokens de status (`destructive`, `success`, `warning`, `info`), os `chart-*` e o `page`
+> não são reapontados e não têm contraste sobre o marinho: **não são usados em seções escuras**. Esses pares
+> ficam como exceções nomeadas no `contrast.test.ts`, e a regra está na página de cores do Storybook.
 
 ### 2.3 `tailwind.config.js`
 
