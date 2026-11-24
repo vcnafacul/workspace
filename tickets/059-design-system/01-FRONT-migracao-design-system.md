@@ -46,11 +46,11 @@ das bibliotecas aposentadas. É o que fazem as Tasks 1–14 do [plano](plano.md)
 **Onde parou:** Tasks 1–14 do [plano](plano.md) implementadas e revisadas, e a revisão final da branch
 também. Falta só o que depende de pessoas: decisões abaixo, congelamento de UI, push e PR.
 
-- Branch `feat/059-01-design-system` no `client-vcnafacul`, HEAD `baac115b`, 115 commits sobre
+- Branch `feat/059-01-design-system` no `client-vcnafacul`, HEAD `c2da18da`, 119 commits sobre
   `develop` @ `6d782d4d` (a `develop` não andou; sem rebase pendente).
-- A branch já tem upstream (`origin/feat/059-01-design-system`); os 2 commits de 2026-11-23 ainda não
-  foram enviados. Não há PR aberto: abra pela skill `abrir-pr`, que roda as verificações.
-- Estado verificado no HEAD (2026-11-23): `yarn test:ci` 368 arquivos / 3208 testes, `yarn build` e
+- A branch está enviada (`origin/feat/059-01-design-system`). Não há PR aberto: abra pela skill
+  `abrir-pr`, que roda as verificações.
+- Estado verificado no HEAD (2026-11-23): `yarn test:ci` 370 arquivos / 3231 testes, `yarn build` e
   `yarn build-storybook` ok, `yarn lint` 0 erros e 44 avisos (teto, ver item 3), guard estrito em zero.
   O CI passou a rodar `yarn lint`.
 - O registro detalhado (cada tarefa, commits, revisões, decisões R1–R56 e achados menores adiados) está no
@@ -71,7 +71,16 @@ também. Falta só o que depende de pessoas: decisões abaixo, congelamento de U
    (`required: true` em `src/pages/Geo/data.ts`), mas o schema não validava, e o select nativo gravava
    "Coordenador" sem escolha. **Issue a abrir depois:** registrar que os cadastros antigos com
    "Coordenador" podem não ter sido escolhidos, para quem analisa esses dados. Citar a mudança no PR.
-5. Conferir no PR: `pendencias-da-questao/classificacao` — no celular, Aceitar/Rejeitar ficam atrás do
+5. ~~Cards do menu lateral da dash~~ **Decidido em 2026-11-23** (`30638da4`): **exceção à R26**. Os cards
+   voltam ao fundo sólido com as cores da `develop` (tokens `identity-<card>`), e cinco delas ficam abaixo
+   de 4,5:1 com o texto branco. O `contrast.test.ts` trava as razões medidas, e a página de cores do
+   Storybook registra a exceção. Antes, Cursinho e Matemática ficavam em `bg-cta` e o resto em
+   `bg-primary`, sobra do codemod.
+6. ~~Cabeçalhos das páginas da dash~~ **Feito em 2026-11-23** (`26325c29`, `c2da18da`): `PageHeader` e
+   `PageShell` novos em `ui/`, extraídos do `DashToolbar`/`DashListTemplate`. Todas as páginas internas da
+   dash usam o cabeçalho das listagens, menos a home da dash, Matéria, Conteúdo e as telas de simulado. O
+   detalhe do estudante no relatório ganhou `Button` e `SegmentedControl` (`796d921b`).
+7. Conferir no PR: `pendencias-da-questao/classificacao` — no celular, Aceitar/Rejeitar ficam atrás do
    Dialog em tela cheia.
 
 **Para o PR e a homologação:**
@@ -86,7 +95,8 @@ de São Paulo; resumo de chamadas adianta a data depois das 21h (`toISOString`);
 `actionAreas`; editores de texto rico sem nome acessível; 4 testes falham com `TZ=Pacific/Kiritimati`;
 `geoSearch/index.test.tsx` instável.
 
-**Atualizar a spec no fim** (o R12 já entrou na §2.2): R31/R55 (SegmentedControl 44px no celular), R34 (tamanho do Dialog pelo
+**Atualizar a spec no fim** (o R12 e a exceção dos cards já entraram na §2.2): `PageHeader`/`PageShell` na
+§3, R31/R55 (SegmentedControl 44px no celular), R34 (tamanho do Dialog pelo
 conteúdo, §7.4), R35 (`OptionsSelect` e `PasswordInput` na §3), R45 (cortes 1200/1565 da navegação, §3),
 `react-refresh` desligado em `ui/**` e as opções novas do jsx-a11y.
 

@@ -420,6 +420,11 @@ Contrast of every semantic pair: see the palette prototype §3. The contrast tes
 > No tema `marine`, os tokens de status (`destructive`, `success`, `warning`, `info`), os `chart-*` e o `page`
 > não são reapontados e não têm contraste sobre o marinho: **não são usados em seções escuras**. Esses pares
 > ficam como exceções nomeadas no `contrast.test.ts`, e a regra está na página de cores do Storybook.
+>
+> **Exceção à R26 (2026-11-23).** Os cards do menu lateral da dash mantêm o fundo sólido com as cores de
+> antes do design system, em tokens `identity-<card>` (`cursinho`, `projeto`, `admin`, `linguagens`,
+> `natureza`, `humanas`, `matematica`, `estudos`) com texto `identity-foreground`. Cinco ficam abaixo de
+> 4,5:1; o `contrast.test.ts` trava as razões medidas. Vale só para esse menu.
 
 ### 2.3 `tailwind.config.js`
 
